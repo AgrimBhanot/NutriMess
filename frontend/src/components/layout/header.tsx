@@ -1,6 +1,5 @@
 "use client";
 
-import { Bell } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface AppHeaderProps {
@@ -21,7 +20,7 @@ export function AppHeader({ bhawanName }: AppHeaderProps) {
           </span>
         </div>
 
-        {/* Bhawan badge + notification */}
+        {/* Bhawan badge */}
         <div className="flex items-center gap-3">
           {bhawanName && (
             <Badge
@@ -31,12 +30,6 @@ export function AppHeader({ bhawanName }: AppHeaderProps) {
               {bhawanName}
             </Badge>
           )}
-          <button
-            className="flex h-10 w-10 items-center justify-center rounded-full text-[#9CA3AF] transition-colors hover:bg-[#F3F4F6] hover:text-[#4B5563]"
-            aria-label="Notifications"
-          >
-            <Bell className="h-5 w-5 stroke-[1.5px]" />
-          </button>
         </div>
       </div>
     </header>

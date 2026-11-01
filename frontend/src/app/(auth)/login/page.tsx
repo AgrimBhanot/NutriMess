@@ -128,6 +128,16 @@ function LoginForm() {
   return (
     <div className="w-full max-w-sm space-y-8">
       {/* Banner for query messages */}
+      {queryMessage === "check_email_secretary" && (
+        <div className="flex items-start gap-2.5 rounded-xl bg-emerald-50 p-3.5 text-sm text-emerald-800 border border-emerald-200">
+          <Info className="h-4 w-4 mt-0.5 shrink-0 text-emerald-600" />
+          <span>
+            Check your email to confirm your account. After signing in you&apos;ll
+            see the Secretary Portal if your hash was correct; otherwise you can
+            re-enter it from your profile.
+          </span>
+        </div>
+      )}
       {queryMessage === "check_email" && (
         <div className="flex items-start gap-2.5 rounded-xl bg-emerald-50 p-3.5 text-sm text-emerald-800 border border-emerald-200">
           <Info className="h-4 w-4 mt-0.5 shrink-0 text-emerald-600" />

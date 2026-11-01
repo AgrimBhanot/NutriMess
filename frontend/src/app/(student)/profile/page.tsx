@@ -9,6 +9,7 @@ import {
 } from "@/lib/constants";
 import { getCurrentProfile } from "@/lib/supabase/profile";
 import { SignOutButton } from "@/components/layout/sign-out-button";
+import { SecretaryVerify } from "@/components/profile/secretary-verify";
 
 export const metadata: Metadata = {
   title: "Profile",
@@ -125,6 +126,8 @@ export default async function ProfilePage() {
       </div>
 
       <SignOutButton />
+
+      {!isSecretary && <SecretaryVerify bhawanId={profile.bhawan_id} />}
     </div>
   );
 }

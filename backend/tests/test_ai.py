@@ -219,3 +219,26 @@ def test_recommendations_endpoint(fake_db: FakeDb) -> None:
     res = client.get("/api/chat/recommendations")
     assert res.status_code == 200
     assert res.json()["meal"] == "dinner" and res.json()["menu_available"] is True
+
+
+# ---------- rate limiting ----------
+
+def test_sliding_window_limiter_blocks_then_recovers(monkeypatch) -> None:
+    from fastapi import HTTPException
+
+    from app.services import rate_limit
+
+    clock = [1000.0]
+    monkeypatch.setattr(rate_limit.time, "monotonic", lambda: clock[0])
+    limiter = rate_limit.SlidingWindowLimiter(limit=2, window_seconds=60)
+
+    limiter.check("u1")
+    limiter.check("u1")
+    limiter.check("u2")  # separate quota per user
+    with pytest.raises(HTTPException) as exc:
+        limiter.check("u1")
+    assert exc.value.status_code == 429
+    assert exc.value.headers["Retry-After"] == "61"
+
+    clock[0] += 61
+    limiter.check("u1")  # window has passed

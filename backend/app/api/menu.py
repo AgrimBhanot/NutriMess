@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 
 from app.models.menu import MenuExtractionResponse
 from app.services.auth import CurrentUser, require_secretary
+from app.services.rate_limit import get_ai_limiter, SlidingWindowLimiter
 from app.services.gemini_client import GeminiNotConfiguredError, GeminiRequestError
 from app.services.menu_parser import extract_menu_from_image
 from app.services.uploads import read_image_upload
@@ -14,9 +15,11 @@ router = APIRouter()
 @router.post("/extract", response_model=MenuExtractionResponse)
 async def extract_menu(
     file: Annotated[UploadFile, File(description="Photo of the weekly menu")],
-    _user: Annotated[CurrentUser, Depends(require_secretary)],
+    user: Annotated[CurrentUser, Depends(require_secretary)],
+    limiter: Annotated[SlidingWindowLimiter, Depends(get_ai_limiter)],
 ) -> MenuExtractionResponse:
     """Extract a structured weekly menu from an uploaded image (secretary only)."""
+    limiter.check(user.id)
     image, mime_type = await read_image_upload(file)
 
     try:

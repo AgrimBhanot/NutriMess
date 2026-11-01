@@ -14,11 +14,17 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     gemini_model: str = "gemini-2.5-flash"
 
-    # CORS
+    # CORS: comma-separated origins, plus an optional regex for Vercel
+    # preview deployments (e.g. https://nutrimess-.*\.vercel\.app)
     cors_origins: str = "http://localhost:3000"
+    cors_origin_regex: str | None = None
 
     # Uploads
     max_upload_mb: int = 10
+
+    # Gemini calls (menu extract, plate analyze, AI chat) per user per window
+    ai_requests_per_window: int = 30
+    ai_window_seconds: int = 600
 
     # App
     app_name: str = "NutriMess API"

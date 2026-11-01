@@ -3,9 +3,8 @@ uvicorn[standard]>=0.30.0
 pydantic>=2.0.0
 pydantic-settings>=2.0.0
 python-dotenv>=1.0.0
-supabase>=2.0.0
 google-genai>=1.0.0
 httpx>=0.27.0
 python-multipart>=0.0.9
-Pillow>=10.0.0
-pytest>=8.0.0
+# zoneinfo data for Asia/Kolkata on slim images
+tzdata>=2024.1

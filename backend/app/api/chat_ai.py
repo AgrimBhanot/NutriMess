@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.models.chat import ChatRequest, ChatResponse, RecommendationResponse
 from app.services.auth import CurrentUser, get_current_user
+from app.services.rate_limit import ai_rate_limited_user
 from app.services.context_builder import build_context
 from app.services.gemini_client import (
     GeminiNotConfiguredError,
@@ -22,7 +23,7 @@ HISTORY_TURNS = 12
 @router.post("", response_model=ChatResponse)
 async def chat(
     body: ChatRequest,
-    user: Annotated[CurrentUser, Depends(get_current_user)],
+    user: Annotated[CurrentUser, Depends(ai_rate_limited_user)],
     engine: Annotated[NutritionEngine, Depends(get_engine)],
 ) -> ChatResponse:
     """AI nutrition assistant grounded in the user's profile, meals and menu.

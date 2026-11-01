@@ -10,3 +10,6 @@ Apply in order on top of `schema.sql`, `seed.sql`, `rls_policies.sql` and
 | `003_rls_performance_and_helper_lockdown.sql` | RLS helpers answer only for the caller; `(select auth.uid())` policies; FK indexes |
 | `004_week3_mess_foods.sql` | 40 extra IITR mess dishes in `food_items` (generated from `backend/app/data/mess_foods.json`) |
 | `005_week4_chat_images_analytics.sql` | `chat-images` bucket, image-only chat messages, `get_bhawan_analytics()` for secretaries |
+| `006_secretary_hash_throttle.sql` | Hash verification internal-only; 5 failed secretary attempts per hour per account |
+
+Access-control audit (self-rolling-back): `../tests/rls_audit.sql`.

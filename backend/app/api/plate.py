@@ -3,7 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 
 from app.models.plate import PlateAnalysis
-from app.services.auth import CurrentUser, get_current_user
+from app.services.auth import CurrentUser
+from app.services.rate_limit import ai_rate_limited_user
 from app.services.gemini_client import GeminiNotConfiguredError, GeminiRequestError
 from app.services.nutrition_engine import NutritionEngine, get_engine
 from app.services.plate_analyzer import analyze_plate
@@ -15,7 +16,7 @@ router = APIRouter()
 @router.post("/analyze", response_model=PlateAnalysis)
 async def analyze(
     file: Annotated[UploadFile, File(description="Photo of the plate")],
-    _user: Annotated[CurrentUser, Depends(get_current_user)],
+    _user: Annotated[CurrentUser, Depends(ai_rate_limited_user)],
     engine: Annotated[NutritionEngine, Depends(get_engine)],
 ) -> PlateAnalysis:
     """Identify foods on a plate photo and estimate their nutrition."""

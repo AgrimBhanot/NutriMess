@@ -5,13 +5,13 @@ NutriMess is a Progressive Web App (PWA) for IIT Roorkee campus mess management 
 
 ## Architecture
 ```
-frontend/          Next.js 14+ (App Router, TypeScript, Tailwind, shadcn/ui, Serwist PWA)
+frontend/          Next.js 16 (App Router, TypeScript, Tailwind v4, shadcn/ui, PWA)
 backend/           FastAPI (Python 3.11+)
 database/          Supabase PostgreSQL (schema, seeds, RLS policies, functions)
 ```
 
 ## Tech Stack
-- **Frontend:** Next.js 14+ App Router, TypeScript (strict), Tailwind CSS, shadcn/ui, Serwist (PWA)
+- **Frontend:** Next.js 16 App Router, TypeScript (strict), Tailwind CSS v4, shadcn/ui; PWA via hand-written `public/sw.js` (Serwist needs webpack, Next 16 uses Turbopack)
 - **Backend:** FastAPI, Python 3.11+, Pydantic v2
 - **Database:** Supabase PostgreSQL + Auth + Storage + Realtime
 - **AI/ML:** Google Gemini API (multimodal, free tier)

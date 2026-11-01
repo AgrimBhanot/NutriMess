@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DIET_PREFERENCES } from "@/lib/constants";
 import { Loader2, Check } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export default function RegisterPage() {
@@ -29,6 +30,8 @@ function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isSecretary = searchParams.get("role") === "secretary";
+  // Per-bhawan QR codes link to /register?bhawan=RB
+  const bhawanCode = searchParams.get("bhawan")?.toUpperCase() ?? null;
 
   const [step, setStep] = useState(1); // 1: credentials, 2: bhawan, 3: preferences (optional)
   const [loading, setLoading] = useState(false);
@@ -60,12 +63,14 @@ function RegisterForm() {
         .order("name");
       if (data && data.length > 0) {
         setBhawans(data);
+        const fromQr = data.find((b) => b.code === bhawanCode);
+        if (fromQr) setSelectedBhawan((current) => current ?? fromQr.id);
       } else if (error) {
         console.error("Failed to load bhawans:", error);
       }
     }
     fetchBhawans();
-  }, []);
+  }, [bhawanCode]);
 
   async function handleRegister() {
     if (!selectedBhawan) {
@@ -77,25 +82,10 @@ function RegisterForm() {
 
     const supabase = createClient();
 
-    // If secretary, verify hash first
-    if (isSecretary) {
-      const { data: valid, error: rpcError } = await supabase.rpc(
-        "verify_secretary_hash",
-        {
-          p_bhawan_id: selectedBhawan,
-          p_hash: secretaryHash.trim(),
-        }
-      );
-
-      if (rpcError || !valid) {
-        setError("Invalid secretary hash. Please check and try again.");
-        setLoading(false);
-        return;
-      }
-    }
-
-    // The DB trigger re-verifies the hash before granting the secretary role,
-    // so the check above is only for a friendly error message.
+    // The signup trigger verifies the hash server-side and grants the
+    // secretary role only if it matches (there's no public pre-check, so the
+    // 16-bit hash can't be brute-forced). A wrong hash registers a student,
+    // who can retry from their profile page.
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: email.trim(),
       password,
@@ -137,8 +127,23 @@ function RegisterForm() {
     }
 
     if (signUpData.user && !signUpData.session) {
-      router.push("/login?message=check_email");
+      router.push(
+        `/login?message=${isSecretary ? "check_email_secretary" : "check_email"}`
+      );
       return;
+    }
+
+    if (isSecretary && signUpData.user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", signUpData.user.id)
+        .maybeSingle();
+      if (profile?.role !== "secretary") {
+        toast.warning(
+          "That secretary hash didn't match, so you're registered as a student. You can try the hash again from your profile."
+        );
+      }
     }
 
     router.push("/");

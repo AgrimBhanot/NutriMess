@@ -1,87 +1,69 @@
 # NutriMess
 
-AI-powered mess nutrition tracker and community platform for IIT Roorkee.
+Mess menu, community chat and personalised nutrition for IIT Roorkee's
+hostels (Bhawans). Installable as a phone app (PWA).
 
-## Features
+**Production URL:** https://nutrimess.vercel.app (see [docs/deployment.md](docs/deployment.md)) · **QR codes:** [`qr/`](qr/)
 
-- **Bhawan-scoped**: 5 Bhawans (Vivekanand, Rajiv, Govind, Jawahar, Himalaya)
-- **Weekly Menu**: Secretary uploads menu image → AI extracts → Students view
-- **Plate Scanner**: Camera-based food recognition with nutrition breakdown
-- **Community Chat**: Per-bhawan weekly chat rooms with realtime messaging
-- **AI Nutrition Assistant**: Personalized advice based on your profile and today's menu
-- **Complaints**: File and track mess complaints
+## What it does
 
-## Tech Stack
+| Students | Mess secretaries |
+|----------|------------------|
+| See this week's menu, today's meals highlighted | Upload a photo of the menu; Gemini reads it into an editable grid; publish |
+| Scan a thali photo for calories and macros, correct portions, log it | Moderate the weekly bhawan chat and post notices |
+| Track daily intake against personal targets; 30-day history | Manage complaints (acknowledge / in progress / resolve, reply) |
+| Ask an AI assistant what to eat, grounded in their menu, meals and goals | Bhawan analytics: engagement, meals logged, complaint trends |
+| Chat with their bhawan (resets weekly), share photos | |
+| File complaints, optionally anonymous | |
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Next.js 16 (App Router, TypeScript, Tailwind v4, shadcn/ui) |
-| Auth | Supabase Auth (Google OAuth + Email/Password) |
-| Database | Supabase PostgreSQL |
-| Realtime | Supabase Realtime |
-| Backend | FastAPI (Python) |
-| AI | Google Gemini API (multimodal) |
-| Nutrition | IFCT 2017 + USDA FoodData Central |
-| Deploy | Vercel + Render + Supabase Cloud |
+Everything is scoped to the user's bhawan by Postgres Row Level Security.
 
-## Local Development
+## Architecture
 
-### Prerequisites
-- Node.js 20+
-- Python 3.11+
-- Supabase account
+```
+frontend/   Next.js 16 PWA (App Router, TypeScript, Tailwind v4)  -> Vercel
+backend/    FastAPI + Google Gemini (menu OCR, plate analysis, AI chat) -> Render
+database/   Supabase Postgres schema, RLS, migrations, RLS audit  -> Supabase
+scripts/    QR code / poster generator
+qr/         Generated QR codes and printable posters
+docs/       Setup, deployment, API, architecture, testing
+```
 
-### Frontend
+The browser talks to Supabase directly for data, auth, storage and realtime
+(RLS enforces access). It calls FastAPI only for Gemini-backed features; the
+backend forwards the user's JWT to Supabase, so RLS applies there too.
+See [docs/architecture.md](docs/architecture.md).
+
+## Quick start (local)
 
 ```bash
-cd frontend
-cp .env.local.example .env.local
-# Fill in Supabase credentials
-npm install
-npm run dev
+# Frontend
+cd frontend && cp .env.local.example .env.local   # fill in Supabase URL + anon key
+npm install && npm run dev                        # http://localhost:3000
+
+# Backend
+cd backend && python -m venv venv && source venv/bin/activate
+pip install -r requirements-dev.txt
+cp .env.example .env                              # Supabase URL/anon key + GEMINI_API_KEY
+uvicorn app.main:app --reload                     # http://localhost:8000/docs
 ```
 
-### Backend
+Full instructions: [docs/setup.md](docs/setup.md). Deploying:
+[docs/deployment.md](docs/deployment.md).
+
+## Tests
 
 ```bash
-cd backend
-cp .env.example .env
-# Fill in API keys
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+cd frontend && npm run lint && npm run type-check && npm test && npm run build
+cd backend && python -m pytest
+# Database access control (Supabase SQL editor; rolls itself back):
+#   database/tests/rls_audit.sql
 ```
 
-### Database
+CI runs the frontend and backend checks on every push
+([.github/workflows/ci.yml](.github/workflows/ci.yml)). Manual test plan:
+[docs/testing.md](docs/testing.md).
 
-1. Create a Supabase project
-2. Run the SQL files in order:
-   ```
-   database/schema.sql
-   database/seed.sql
-   database/functions.sql
-   database/rls_policies.sql
-   ```
+## Team
 
-## Project Structure
-
-```
-NutriMess/
-├── frontend/          Next.js PWA
-├── backend/           FastAPI Python API
-├── database/          SQL schema, seeds, RLS policies
-├── designs/           UI design mockups
-└── AGENTS.md          Development guidelines
-```
-
-## Design System
-
-**Forestry & Terracotta Modern** — a minimalist editorial light-mode design:
-
-- **Pine Green** `#244E3D` — primary controls
-- **Terracotta** `#BA5D38` — accents, alerts
-- **Porcelain** `#F9FAFB` — page background
-- **Inter** — single typeface, tabular numbers for nutrition data
-
-## License
-
-MIT
+Agrim (database, auth, chat) · Akshat (frontend, PWA) · Aditya (backend, AI)
