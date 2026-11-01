@@ -1,0 +1,164 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+
+  /* Forestry & Terracotta — custom design tokens */
+  --color-pine: var(--pine);
+  --color-pine-foreground: var(--pine-foreground);
+  --color-terra: var(--terra);
+  --color-terra-foreground: var(--terra-foreground);
+  --color-surface: var(--surface);
+
+  /* shadcn semantic tokens */
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/*
+ * ============================================
+ * Forestry & Terracotta Modern — Light Theme
+ * ============================================
+ * 60% Neutral: #F9FAFB (bg), #FFFFFF (surface)
+ * 30% Content: #111827, #4B5563, #9CA3AF
+ * 10% Brand:   #244E3D (pine), #BA5D38 (terra)
+ */
+:root {
+  /* Page & surface */
+  --background: #F9FAFB;
+  --foreground: #111827;
+  --surface: #FFFFFF;
+
+  /* Cards */
+  --card: #FFFFFF;
+  --card-foreground: #111827;
+
+  /* Popovers */
+  --popover: #FFFFFF;
+  --popover-foreground: #111827;
+
+  /* Primary — Deep Pine Green */
+  --primary: #244E3D;
+  --primary-foreground: #FFFFFF;
+
+  /* Secondary — Light muted */
+  --secondary: #F3F4F6;
+  --secondary-foreground: #111827;
+
+  /* Muted */
+  --muted: #F3F4F6;
+  --muted-foreground: #9CA3AF;
+
+  /* Accent */
+  --accent: #F3F4F6;
+  --accent-foreground: #111827;
+
+  /* Destructive */
+  --destructive: #DC2626;
+
+  /* Brand colors */
+  --pine: #244E3D;
+  --pine-foreground: #FFFFFF;
+  --terra: #BA5D38;
+  --terra-foreground: #FFFFFF;
+
+  /* Borders & inputs */
+  --border: #E5E7EB;
+  --input: #E5E7EB;
+  --ring: #244E3D;
+
+  /* Charts — warm palette */
+  --chart-1: #244E3D;
+  --chart-2: #BA5D38;
+  --chart-3: #4B5563;
+  --chart-4: #9CA3AF;
+  --chart-5: #D1D5DB;
+
+  /* Radius — 16px card radius per design system */
+  --radius: 1rem;
+
+  /* Sidebar */
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #111827;
+  --sidebar-primary: #244E3D;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F3F4F6;
+  --sidebar-accent-foreground: #111827;
+  --sidebar-border: #E5E7EB;
+  --sidebar-ring: #244E3D;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "tnum" on, "lnum" on;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+/* Tabular numbers utility for nutrition data */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" on;
+}
+
+/* Card shadow per design system spec */
+.card-shadow {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+/* Pulse animation for live status indicators */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
