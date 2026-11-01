@@ -19,9 +19,20 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     permissions:
+      id-token: write
       contents: read
     steps:
       - uses: actions/checkout@v4
+
+      # The Static Web App authorizes deploys with GitHub OIDC, so the deploy
+      # action needs an ID token. github-script ships @actions/core as `core`,
+      # so nothing is npm-installed (a root package-lock.json once broke builds).
+      - name: Get Id Token
+        uses: actions/github-script@v7
+        id: idtoken
+        with:
+          script: return await core.getIDToken()
+          result-encoding: string
 
       - name: Build And Deploy
         id: builddeploy
@@ -42,6 +53,7 @@ jobs:
           app_location: "frontend"
           api_location: ""
           output_location: ""
+          github_id_token: ${{ steps.idtoken.outputs.result }}
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
