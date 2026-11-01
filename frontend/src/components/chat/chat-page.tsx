@@ -23,6 +23,7 @@ export async function ChatPage() {
       weekStart={data.week.week_start}
       weekEnd={data.week.week_end}
       bhawanName={profile.bhawans?.name ?? "Bhawan"}
+      bhawanId={profile.bhawan_id}
       userId={profile.id}
       userRole={profile.role}
       menuImageUrl={data.menuImageUrl}

@@ -33,6 +33,10 @@ export default async function ProfilePage() {
     { label: "Age", value: profile.age ? `${profile.age} yrs` : "Not set" },
     { label: "Height", value: profile.height_cm ? `${profile.height_cm} cm` : "Not set" },
     { label: "Weight", value: profile.weight_kg ? `${profile.weight_kg} kg` : "Not set" },
+    {
+      label: "Allergies",
+      value: profile.allergies?.length ? profile.allergies.join(", ") : "None",
+    },
   ];
 
   return (
@@ -96,9 +100,18 @@ export default async function ProfilePage() {
 
       {/* Nutrition profile */}
       <div className="rounded-2xl border border-[#E5E7EB] bg-white p-4 card-shadow">
-        <h3 className="mb-3 text-sm font-semibold text-[#111827]">
-          Nutrition Profile
-        </h3>
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-[#111827]">
+            Nutrition Profile
+          </h3>
+          <Link
+            href="/profile/edit"
+            className="flex items-center gap-0.5 text-xs font-medium text-[#244E3D]"
+          >
+            Edit
+            <ChevronRight className="h-3.5 w-3.5 stroke-[1.5px]" />
+          </Link>
+        </div>
         <div className="grid grid-cols-2 gap-3 text-sm">
           {details.map((d) => (
             <div key={d.label}>

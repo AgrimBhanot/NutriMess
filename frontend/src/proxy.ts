@@ -15,6 +15,6 @@ export const config = {
      * - icons/ and screenshots/ (PWA assets)
      * - api/ routes (handled separately)
      */
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|icons/|screenshots/|manifest.json|sw.js).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|icons/|screenshots/|manifest.json|sw.js|offline.html).*)",
   ],
 };

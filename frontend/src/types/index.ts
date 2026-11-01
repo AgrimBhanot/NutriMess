@@ -282,3 +282,38 @@ export interface FoodRecord {
   per_100g: Macros;
   source: string | null;
 }
+
+// ============================================
+// AI assistant (FastAPI)
+// ============================================
+
+export interface MealSuggestion {
+  food_name: string;
+  grams: number;
+  serving_unit: string | null;
+  nutrients: Macros;
+  reason: string;
+  kind: "recommended" | "limit";
+}
+
+export interface AiChatReply {
+  session_id: string;
+  reply: string;
+  suggestions: MealSuggestion[];
+}
+
+export interface Recommendations {
+  meal: MealType;
+  day: "today" | "tomorrow";
+  menu_available: boolean;
+  targets: Macros;
+  eaten_today: Macros;
+  suggestions: MealSuggestion[];
+}
+
+export interface AiChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  created_at: string;
+}

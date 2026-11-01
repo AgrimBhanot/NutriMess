@@ -2,36 +2,21 @@
   "name": "NutriMess — IITR Mess Nutrition",
   "short_name": "NutriMess",
   "description": "AI-powered mess nutrition tracker and community platform for IIT Roorkee",
-  "start_url": "/dashboard",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#F9FAFB",
   "theme_color": "#244E3D",
   "orientation": "portrait",
   "icons": [
-    {
-      "src": "/icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    },
-    {
-      "src": "/icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
-  "screenshots": [
-    {
-      "src": "/screenshots/home.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow"
-    }
+  "shortcuts": [
+    { "name": "Scan plate", "url": "/scan", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Weekly menu", "url": "/menu", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
   ],
   "categories": ["food", "health", "education"]
 }

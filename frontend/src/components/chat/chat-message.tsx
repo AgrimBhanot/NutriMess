@@ -5,6 +5,7 @@ import type { ChatMessage as ChatMessageType } from "@/types";
 interface ChatMessageProps {
   message: ChatMessageType;
   replyTo?: ChatMessageType;
+  imageUrl?: string;
   isOwn: boolean;
   canDelete: boolean;
   onReply: () => void;
@@ -23,6 +24,7 @@ function formatTime(iso: string): string {
 export function ChatMessage({
   message,
   replyTo,
+  imageUrl,
   isOwn,
   canDelete,
   onReply,
@@ -60,10 +62,25 @@ export function ChatMessage({
         {replyTo && (
           <div className="mb-1.5 border-l-2 border-[#244E3D]/30 pl-2 text-xs text-[#9CA3AF]">
             <span className="font-medium">{replyTo.author_name ?? "Student"}:</span>{" "}
-            <span className="line-clamp-1">{replyTo.content}</span>
+            <span className="line-clamp-1">{replyTo.content || "Photo"}</span>
           </div>
         )}
-        <p className="whitespace-pre-wrap break-words">{message.content}</p>
+        {message.image_url &&
+          (imageUrl ? (
+            <a href={imageUrl} target="_blank" rel="noreferrer" className="mb-1.5 block">
+              {/* eslint-disable-next-line @next/next/no-img-element -- signed Supabase URL */}
+              <img
+                src={imageUrl}
+                alt="Shared photo"
+                className="max-h-60 rounded-xl object-cover"
+              />
+            </a>
+          ) : (
+            <div className="mb-1.5 h-40 w-48 animate-pulse rounded-xl bg-[#F3F4F6]" />
+          ))}
+        {message.content && (
+          <p className="whitespace-pre-wrap break-words">{message.content}</p>
+        )}
       </div>
 
       <div className="mt-0.5 flex gap-2 px-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 [@media(hover:none)]:opacity-100">

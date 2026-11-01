@@ -82,15 +82,16 @@ export function useChat(chatWeekId: string, userId: string) {
   }, [supabase, chatWeekId]);
 
   const sendMessage = useCallback(
-    async (content: string, replyTo?: string | null) => {
+    async (content: string, replyTo?: string | null, imagePath?: string | null) => {
       const text = content.trim();
-      if (!text) return;
+      if (!text && !imagePath) return;
       const { data, error: sendError } = await supabase
         .from("chat_messages")
         .insert({
           chat_week_id: chatWeekId,
           user_id: userId,
           content: text,
+          image_url: imagePath ?? null,
           reply_to: replyTo ?? null,
         })
         .select("*")

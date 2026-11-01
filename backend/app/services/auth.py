@@ -1,10 +1,9 @@
 from typing import Annotated
 
-import httpx
 from fastapi import Depends, Header, HTTPException, status
 from pydantic import BaseModel
 
-from app.config import get_settings
+from app.services.supabase_rest import SupabaseRest
 
 
 class CurrentUser(BaseModel):
@@ -12,19 +11,11 @@ class CurrentUser(BaseModel):
     email: str | None = None
     role: str
     bhawan_id: str | None = None
+    token: str = ""
 
-
-async def _supabase_get(path: str, token: str) -> httpx.Response:
-    settings = get_settings()
-    if not settings.supabase_url or not settings.supabase_api_key:
-        raise HTTPException(
-            status.HTTP_503_SERVICE_UNAVAILABLE, "Supabase is not configured on the server"
-        )
-    async with httpx.AsyncClient(timeout=10) as client:
-        return await client.get(
-            f"{settings.supabase_url}{path}",
-            headers={"apikey": settings.supabase_api_key, "Authorization": f"Bearer {token}"},
-        )
+    def db(self) -> SupabaseRest:
+        """PostgREST client acting as this user (RLS applies)."""
+        return SupabaseRest(self.token)
 
 
 async def get_current_user(
@@ -38,15 +29,12 @@ async def get_current_user(
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Missing bearer token")
     token = authorization.split(" ", 1)[1].strip()
 
-    user_res = await _supabase_get("/auth/v1/user", token)
-    if user_res.status_code != 200:
+    db = SupabaseRest(token)
+    user = await db.get_user()
+    if user is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired session")
-    user = user_res.json()
 
-    profile_res = await _supabase_get(
-        f"/rest/v1/profiles?id=eq.{user['id']}&select=role,bhawan_id", token
-    )
-    rows = profile_res.json() if profile_res.status_code == 200 else []
+    rows = await db.select("profiles", {"id": f"eq.{user['id']}", "select": "role,bhawan_id"})
     if not rows:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Profile not found")
 
@@ -55,6 +43,7 @@ async def get_current_user(
         email=user.get("email"),
         role=rows[0]["role"],
         bhawan_id=rows[0].get("bhawan_id"),
+        token=token,
     )
 
 

@@ -6,6 +6,8 @@ import { currentMeal, mealState } from "@/lib/meal-time";
 import { dayOfWeek, istMinutesNow, istToday, weekMonday } from "@/lib/week";
 import { MenuCard } from "@/components/menu/menu-card";
 import { DailySummary } from "@/components/nutrition/daily-summary";
+import { RecommendationCard } from "@/components/ai/recommendation-card";
+import { InstallPrompt } from "@/components/pwa/install-prompt";
 import { computeTargets, sumMacros } from "@/lib/nutrition";
 import { logMacros } from "@/lib/meal-history";
 import type { MealLog } from "@/types";
@@ -16,6 +18,7 @@ import {
   TrendingUp,
   AlertCircle,
   ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -62,6 +65,8 @@ export default async function DashboardPage() {
         </h2>
         <p className="text-sm text-[#9CA3AF]">{dateStr}</p>
       </div>
+
+      <InstallPrompt />
 
       {/* Live meal status */}
       {liveMeal && (
@@ -113,6 +118,8 @@ export default async function DashboardPage() {
         <DailySummary totals={todaysTotals} targets={targets} />
       </Link>
 
+      <RecommendationCard />
+
       {/* Quick actions */}
       <div className="grid grid-cols-2 gap-3">
         <Link
@@ -163,6 +170,24 @@ export default async function DashboardPage() {
           </span>
         </Link>
       </div>
+
+      <Link
+        href="/ai-chat"
+        className="flex items-center gap-4 rounded-2xl border border-[#E5E7EB] bg-white p-4 transition-all hover:border-[#244E3D]/20 card-shadow"
+      >
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#244E3D]/10">
+          <Sparkles className="h-5 w-5 stroke-[1.5px] text-[#244E3D]" />
+        </div>
+        <div className="flex-1">
+          <span className="text-sm font-medium text-[#111827]">
+            Nutrition Assistant
+          </span>
+          <p className="text-xs text-[#9CA3AF]">
+            Ask what to eat from today&apos;s menu
+          </p>
+        </div>
+        <ChevronRight className="h-4 w-4 stroke-[1.5px] text-[#9CA3AF]" />
+      </Link>
 
       <Link
         href="/complaints"

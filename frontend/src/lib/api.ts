@@ -1,5 +1,11 @@
 import { API_URL } from "@/lib/constants";
-import type { FoodRecord, MenuExtraction, PlateAnalysis } from "@/types";
+import type {
+  AiChatReply,
+  FoodRecord,
+  MenuExtraction,
+  PlateAnalysis,
+  Recommendations,
+} from "@/types";
 
 export class ApiError extends Error {
   constructor(
@@ -79,4 +85,27 @@ export async function searchFoods(
     { signal }
   );
   return res.foods;
+}
+
+/** Ask the AI nutrition assistant; omit sessionId to start a new chat. */
+export function sendAiMessage(
+  message: string,
+  sessionId: string | null,
+  accessToken: string
+): Promise<AiChatReply> {
+  return request<AiChatReply>("/api/chat", accessToken, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message, session_id: sessionId }),
+  });
+}
+
+/** Rule-based picks for the user's next meal (no AI call). */
+export function getRecommendations(
+  accessToken: string,
+  signal?: AbortSignal
+): Promise<Recommendations> {
+  return request<Recommendations>("/api/chat/recommendations", accessToken, {
+    signal,
+  });
 }

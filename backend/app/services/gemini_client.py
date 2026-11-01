@@ -32,30 +32,15 @@ def get_client() -> genai.Client:
     return genai.Client(api_key=settings.gemini_api_key)
 
 
-async def generate_structured(
-    *,
-    prompt: str,
-    image: bytes,
-    mime_type: str,
-    schema: type[T],
-    max_attempts: int = 3,
-) -> T:
-    """Send an image + prompt to Gemini and parse the JSON reply into `schema`.
-
-    Retries with exponential backoff on rate limits and server errors.
-    """
+async def _generate(
+    contents: list, config: types.GenerateContentConfig, max_attempts: int
+) -> types.GenerateContentResponse:
+    """generate_content with exponential backoff on rate limits / server errors."""
     settings = get_settings()
     client = get_client()
-    config = types.GenerateContentConfig(
-        response_mime_type="application/json",
-        response_schema=schema,
-        temperature=0.1,
-    )
-    contents = [types.Part.from_bytes(data=image, mime_type=mime_type), prompt]
-
     for attempt in range(1, max_attempts + 1):
         try:
-            response = await client.aio.models.generate_content(
+            return await client.aio.models.generate_content(
                 model=settings.gemini_model,
                 contents=contents,
                 config=config,
@@ -67,14 +52,55 @@ async def generate_structured(
                 await asyncio.sleep(delay)
                 continue
             raise GeminiRequestError(f"Gemini request failed: {exc.message}") from exc
-
-        if isinstance(response.parsed, schema):
-            return response.parsed
-        if response.text:
-            try:
-                return schema.model_validate_json(response.text)
-            except ValueError as exc:
-                raise GeminiRequestError("Gemini returned malformed JSON") from exc
-        raise GeminiRequestError("Gemini returned an empty response")
-
     raise GeminiRequestError("Gemini request failed after retries")
+
+
+async def generate_structured(
+    *,
+    prompt: str,
+    image: bytes,
+    mime_type: str,
+    schema: type[T],
+    max_attempts: int = 3,
+) -> T:
+    """Send an image + prompt to Gemini and parse the JSON reply into `schema`."""
+    config = types.GenerateContentConfig(
+        response_mime_type="application/json",
+        response_schema=schema,
+        temperature=0.1,
+    )
+    contents = [types.Part.from_bytes(data=image, mime_type=mime_type), prompt]
+    response = await _generate(contents, config, max_attempts)
+
+    if isinstance(response.parsed, schema):
+        return response.parsed
+    if response.text:
+        try:
+            return schema.model_validate_json(response.text)
+        except ValueError as exc:
+            raise GeminiRequestError("Gemini returned malformed JSON") from exc
+    raise GeminiRequestError("Gemini returned an empty response")
+
+
+async def generate_chat(
+    *,
+    system: str,
+    history: list[tuple[str, str]],
+    message: str,
+    max_attempts: int = 3,
+) -> str:
+    """Multi-turn text reply. `history` is (role, text) with role user|assistant."""
+    contents = [
+        types.Content(
+            role="model" if role == "assistant" else "user",
+            parts=[types.Part(text=text)],
+        )
+        for role, text in history
+    ]
+    contents.append(types.Content(role="user", parts=[types.Part(text=message)]))
+    config = types.GenerateContentConfig(system_instruction=system, temperature=0.6)
+
+    response = await _generate(contents, config, max_attempts)
+    if not response.text:
+        raise GeminiRequestError("Gemini returned an empty response")
+    return response.text.strip()

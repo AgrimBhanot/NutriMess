@@ -4,6 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ImageIcon, Loader2, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useChat } from "@/lib/hooks/use-chat";
+import { downscaleImage } from "@/lib/image";
+import { createClient } from "@/lib/supabase/client";
+import { BUCKETS, signedImageUrls, uploadImage } from "@/lib/supabase/storage";
 import type { ChatMessage as ChatMessageType, UserRole } from "@/types";
 import { ChatInput } from "./chat-input";
 import { ChatMessage } from "./chat-message";
@@ -14,6 +17,7 @@ interface ChatRoomProps {
   weekStart: string;
   weekEnd: string;
   bhawanName: string;
+  bhawanId: string;
   userId: string;
   userRole: UserRole;
   menuImageUrl: string | null;
@@ -24,6 +28,7 @@ export function ChatRoom({
   weekStart,
   weekEnd,
   bhawanName,
+  bhawanId,
   userId,
   userRole,
   menuImageUrl,
@@ -39,13 +44,35 @@ export function ChatRoom({
     [messages]
   );
 
+  // Signed URLs for image attachments (private, bhawan-scoped bucket)
+  const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
+  const requestedImages = useRef(new Set<string>());
+  useEffect(() => {
+    const missing = messages
+      .map((m) => m.image_url)
+      .filter((p): p is string => !!p && !requestedImages.current.has(p));
+    if (missing.length === 0) return;
+    missing.forEach((p) => requestedImages.current.add(p));
+    signedImageUrls(createClient(), BUCKETS.chatImages, missing).then((urls) =>
+      setImageUrls((prev) => ({ ...prev, ...urls }))
+    );
+  }, [messages]);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages.length]);
 
-  async function handleSend(content: string) {
+  async function handleSend(content: string, image: File | null) {
     try {
-      await sendMessage(content, replyTo?.id);
+      const imagePath = image
+        ? await uploadImage(
+            createClient(),
+            BUCKETS.chatImages,
+            bhawanId,
+            await downscaleImage(image)
+          )
+        : null;
+      await sendMessage(content, replyTo?.id, imagePath);
       setReplyTo(null);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to send");
@@ -119,6 +146,7 @@ export function ChatRoom({
               key={message.id}
               message={message}
               replyTo={message.reply_to ? byId.get(message.reply_to) : undefined}
+              imageUrl={message.image_url ? imageUrls[message.image_url] : undefined}
               isOwn={message.user_id === userId}
               canDelete={
                 message.user_id === userId || userRole === "secretary"

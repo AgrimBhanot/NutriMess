@@ -1,7 +1,7 @@
 import { connection } from "next/server";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ScanLine, Utensils } from "lucide-react";
+import { ChevronRight, ScanLine, Utensils } from "lucide-react";
 import { getCurrentProfile } from "@/lib/supabase/profile";
 import { computeTargets, sumMacros } from "@/lib/nutrition";
 import { dailyTotals, getRecentMealLogs, logMacros } from "@/lib/meal-history";
@@ -60,6 +60,14 @@ export default async function NutritionPage() {
       </div>
 
       <WeeklyChart days={dailyTotals(logs, today)} target={targets.calories} />
+
+      <Link
+        href="/nutrition/history"
+        className="flex items-center justify-between rounded-2xl border border-[#E5E7EB] bg-white p-4 text-sm font-medium text-[#111827] card-shadow"
+      >
+        View meal history
+        <ChevronRight className="h-4 w-4 stroke-[1.5px] text-[#9CA3AF]" />
+      </Link>
     </div>
   );
 }
