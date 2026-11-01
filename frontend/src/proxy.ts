@@ -14,7 +14,8 @@ export const config = {
      * - favicon.ico, sitemap.xml, robots.txt (metadata files)
      * - icons/ and screenshots/ (PWA assets)
      * - api/ routes (handled separately)
+     * - .swa/ (Azure Static Web Apps health check)
      */
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|icons/|screenshots/|manifest.json|sw.js|offline.html).*)",
+    "/((?!\\.swa|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|icons/|screenshots/|manifest.json|sw.js|offline.html).*)",
   ],
 };

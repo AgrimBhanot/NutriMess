@@ -2,14 +2,14 @@
 
 Usage (from the repo root):
     pip install -r scripts/requirements.txt
-    python scripts/generate_qr.py --url https://nutrimess.vercel.app
+    python scripts/generate_qr.py --url https://kind-coast-021723100.1.azurestaticapps.net
 
 Writes to qr/:
     nutrimess-qr.png / .svg       app QR (opens the app; login or dashboard)
     nutrimess-poster.png          general A5 poster
     posters/nutrimess-<CODE>.png  one poster per bhawan, linking to
                                   /register?bhawan=<CODE> so it's preselected
-Rerun with your real URL if the Vercel deployment name differs.
+Rerun with --url if the app moves (e.g. to a custom domain).
 """
 
 import argparse
@@ -110,7 +110,7 @@ def poster(url: str, subtitle: str, out: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--url", default="https://nutrimess.vercel.app", help="Deployed app URL")
+    parser.add_argument("--url", default="https://kind-coast-021723100.1.azurestaticapps.net", help="Deployed app URL")
     parser.add_argument("--out", default="qr", help="Output directory")
     args = parser.parse_args()
 

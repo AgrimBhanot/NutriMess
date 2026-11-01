@@ -1,9 +1,9 @@
 # Architecture & key decisions
 
 ```
-Phone (PWA) ──► Next.js on Vercel ──► Supabase (Postgres + Auth + Storage + Realtime)
+Phone (PWA) ──► Next.js on Azure Static Web Apps ──► Supabase (Postgres + Auth + Storage + Realtime)
                      │                        ▲
-                     └──► FastAPI on Render ──┘ (with the user's JWT)
+                     └──► FastAPI on Azure App Service ──┘ (with the user's JWT)
                                 │
                                 └──► Google Gemini
 ```

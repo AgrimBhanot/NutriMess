@@ -16,7 +16,7 @@ database/          Supabase PostgreSQL (schema, seeds, RLS policies, functions)
 - **Database:** Supabase PostgreSQL + Auth + Storage + Realtime
 - **AI/ML:** Google Gemini API (multimodal, free tier)
 - **Nutrition:** IFCT 2017 (seeded) + USDA FoodData Central (fallback)
-- **Deploy:** Vercel (frontend), Render (backend), Supabase Cloud (DB)
+- **Deploy:** Azure Static Web Apps (frontend), Azure App Service (backend), Supabase Cloud (DB); see docs/deployment.md
 
 ## Design System — "Forestry & Terracotta Modern"
 Strict adherence required. No emojis in UI chrome.

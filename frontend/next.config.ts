@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Self-contained server bundle: keeps the Azure Static Web Apps hybrid
+  // deployment under its 250 MB limit
+  output: "standalone",
   async headers() {
     return [
       {

@@ -3,7 +3,7 @@
 Mess menu, community chat and personalised nutrition for IIT Roorkee's
 hostels (Bhawans). Installable as a phone app (PWA).
 
-**Production URL:** https://nutrimess.vercel.app (see [docs/deployment.md](docs/deployment.md)) · **QR codes:** [`qr/`](qr/)
+**Live:** https://kind-coast-021723100.1.azurestaticapps.net (Azure; see [docs/deployment.md](docs/deployment.md)) · **QR codes:** [`qr/`](qr/)
 
 ## What it does
 
@@ -21,8 +21,8 @@ Everything is scoped to the user's bhawan by Postgres Row Level Security.
 ## Architecture
 
 ```
-frontend/   Next.js 16 PWA (App Router, TypeScript, Tailwind v4)  -> Vercel
-backend/    FastAPI + Google Gemini (menu OCR, plate analysis, AI chat) -> Render
+frontend/   Next.js 16 PWA (App Router, TypeScript, Tailwind v4)  -> Azure Static Web Apps
+backend/    FastAPI + Google Gemini (menu OCR, plate analysis, AI chat) -> Azure App Service
 database/   Supabase Postgres schema, RLS, migrations, RLS audit  -> Supabase
 scripts/    QR code / poster generator
 qr/         Generated QR codes and printable posters
@@ -61,7 +61,8 @@ cd backend && python -m pytest
 ```
 
 CI runs the frontend and backend checks on every push
-([.github/workflows/ci.yml](.github/workflows/ci.yml)). Manual test plan:
+([.github/workflows/ci.yml](.github/workflows/ci.yml)); pushes to `main` deploy
+the changed part to Azure automatically. Manual test plan:
 [docs/testing.md](docs/testing.md).
 
 ## Team

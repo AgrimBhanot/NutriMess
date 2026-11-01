@@ -1,50 +1,61 @@
-name: Azure Static Web Apps CI/CD
+name: Deploy frontend (Azure Static Web Apps)
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/azure-static-web-apps-kind-coast-021723100.yml"
   pull_request:
     types: [opened, synchronize, reopened, closed]
-    branches:
-      - main
+    branches: [main]
+    paths:
+      - "frontend/**"
+  workflow_dispatch:
 
 jobs:
   build_and_deploy_job:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     permissions:
-       id-token: write
-       contents: read
+      id-token: write
+      contents: read
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-          lfs: false
+      - uses: actions/checkout@v4
+
       - name: Install OIDC Client from Core Package
         run: npm install @actions/core@1.6.0 @actions/http-client
+
       - name: Get Id Token
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         id: idtoken
         with:
-           script: |
-               const coredemo = require('@actions/core')
-               return await coredemo.getIDToken()
-           result-encoding: string
+          script: |
+            const coredemo = require('@actions/core')
+            return await coredemo.getIDToken()
+          result-encoding: string
+
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
+        # NEXT_PUBLIC_* values are compiled into the JS at build time, so they
+        # must be set here (and also in the SWA resource's Environment
+        # variables for server-side rendering at request time).
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://zvepctjxrvdtoyatpzqh.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_API_URL: https://nutrimess-backend-fbb3fwemg4evckah.eastasia-01.azurewebsites.net
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_KIND_COAST_021723100 }}
           action: "upload"
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "/" # App source code path
-          api_location: "" # Api source code path - optional
-          output_location: ".next" # Built app content directory - optional
+          # Hybrid (SSR) Next.js app in frontend/; output_location stays empty
+          # so SWA serves it as a Next.js app rather than static files.
+          # package.json "engines" pins Node 22 (Next 16 needs >= 20.9).
+          app_location: "frontend"
+          api_location: ""
+          output_location: ""
           github_id_token: ${{ steps.idtoken.outputs.result }}
-          ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
@@ -55,4 +66,5 @@ jobs:
         id: closepullrequest
         uses: Azure/static-web-apps-deploy@v1
         with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_KIND_COAST_021723100 }}
           action: "close"

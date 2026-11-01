@@ -1,94 +1,143 @@
-# Deployment
+# Deployment (Azure)
 
-Target: frontend on **Vercel** (`https://nutrimess.vercel.app`), backend on
-**Render** (free tier, Singapore), database on **Supabase**. Total cost: free.
+| Part | Service | URL |
+|------|---------|-----|
+| Frontend | Azure Static Web Apps "NutriMess" (hybrid Next.js) | https://kind-coast-021723100.1.azurestaticapps.net |
+| Backend | Azure App Service "NutriMess-backend" (Linux, Python) | https://nutrimess-backend-fbb3fwemg4evckah.eastasia-01.azurewebsites.net |
+| Database/Auth | Supabase project `zvepctjxrvdtoyatpzqh` | |
 
-Deploy in this order: backend → frontend → Supabase auth URLs → QR codes.
+## How deploys work
 
-## 1. Backend on Render
+Pushing to `main` triggers GitHub Actions; each workflow only runs when its
+part of the repo changed:
 
-1. Render dashboard → **New → Blueprint** → select the GitHub repo. Render
-   reads `render.yaml` and creates `nutrimess-api` (Docker, `backend/`).
-2. Enter the secret env vars when prompted:
-   - `SUPABASE_ANON_KEY`: Supabase → Project Settings → API → anon key
-   - `GEMINI_API_KEY`
-3. Wait for the deploy, then open `https://<service>.onrender.com/api/health`.
-   It should return `{"status":"healthy",...}`.
+| Workflow | Runs when | Does |
+|----------|-----------|------|
+| `ci.yml` | every push / PR | lint, type-check, unit tests, build; backend pytest |
+| `azure-static-web-apps-kind-coast-021723100.yml` | `frontend/**` changes | Azure's Oryx builds `frontend/` (`npm run build` → standalone Next.js) and deploys it. PRs get a temporary preview URL, removed when the PR closes |
+| `azure-backend.yml` | `backend/**` changes | runs pytest, zips `backend/app` + `requirements.txt`, deploys with the publish profile, then polls `/api/health` |
 
-Free-tier services sleep after 15 minutes idle; the first request after that
-takes ~30–60 s. The app handles it (the dashboard suggestion card simply
-appears late). Upgrade the instance, or ping `/api/health` on a schedule,
-before a demo.
+Both deploy workflows can also be run by hand: GitHub → Actions → pick the
+workflow → **Run workflow**.
 
-If your Vercel URL ends up different from `nutrimess.vercel.app`, update
-`CORS_ORIGINS` (and `CORS_ORIGIN_REGEX`) in Render.
+## One-time setup
 
-## 2. Frontend on Vercel
+### GitHub repository secrets
+(Settings → Secrets and variables → Actions)
 
-1. Vercel → **Add New → Project** → import the GitHub repo.
-2. **Project name:** `nutrimess` (this gives `nutrimess.vercel.app`; if it is
-   taken, note the URL you get; see step 5).
-3. **Root Directory:** `frontend`. Framework preset: Next.js (auto).
-4. Environment variables (Production and Preview):
+| Secret | Value |
+|--------|-------|
+| `AZURE_STATIC_WEB_APPS_API_TOKEN_KIND_COAST_021723100` | created by Azure already |
+| `AZURE_BACKEND_PUBLISH_PROFILE` | contents of the backend's downloaded publish profile |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → Project Settings → API → anon key |
 
-   | Name | Value |
-   |------|-------|
-   | `NEXT_PUBLIC_SUPABASE_URL` | `https://zvepctjxrvdtoyatpzqh.supabase.co` |
-   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon key |
-   | `NEXT_PUBLIC_API_URL` | your Render URL, e.g. `https://nutrimess-api.onrender.com` |
+If a publish profile is ever shared (chat, screenshot), reset it in the
+portal (App Service → Overview → **Reset publish profile**), download the
+new one and update the secret.
 
-5. Deploy. Pushes to `main` redeploy automatically.
+### Backend App Service (portal → NutriMess-backend)
 
-## 3. Supabase configuration
+**Settings → Configuration → General settings**
+
+- Stack: **Python 3.12**
+- Startup command:
+  ```
+  gunicorn --worker-class uvicorn.workers.UvicornWorker --workers 1 --timeout 120 --bind 0.0.0.0:8000 app.main:app
+  ```
+  (one async worker handles many concurrent requests and keeps the
+  in-memory AI quota exact; `--timeout 120` leaves room for Gemini calls)
+- SCM Basic Auth Publishing Credentials: **On** (needed for publish-profile deploys)
+
+**Settings → Environment variables (App settings)**
+
+| Name | Value |
+|------|-------|
+| `SCM_DO_BUILD_DURING_DEPLOYMENT` | `true` (installs requirements.txt on deploy) |
+| `SUPABASE_URL` | `https://zvepctjxrvdtoyatpzqh.supabase.co` |
+| `SUPABASE_ANON_KEY` | anon key |
+| `GEMINI_API_KEY` | your Gemini key |
+| `GEMINI_MODEL` | `gemini-2.5-flash` |
+| `CORS_ORIGINS` | `https://kind-coast-021723100.1.azurestaticapps.net,http://localhost:3000` |
+| `CORS_ORIGIN_REGEX` | `https://kind-coast-021723100-\d+\.[a-z0-9]+\.1\.azurestaticapps\.net` (PR previews) |
+
+**Monitoring → Health check**: path `/api/health`.
+
+### Frontend Static Web App (portal → NutriMess)
+
+**Settings → Environment variables** (used at request time for server
+rendering; the workflow supplies the same values at build time):
+
+| Name | Value |
+|------|-------|
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://zvepctjxrvdtoyatpzqh.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon key |
+| `NEXT_PUBLIC_API_URL` | `https://nutrimess-backend-fbb3fwemg4evckah.eastasia-01.azurewebsites.net` |
+
+Plan: hybrid Next.js works on the **Free** plan too; Standard is only needed
+for custom auth, linked backends or the SLA. Switching to Free (Hosting
+plan) saves Azure for Students credit.
+
+Hybrid Next.js on Static Web Apps is a **preview** feature. If a deploy
+builds but pages fail at runtime, check the workflow log and the SWA
+**Environments** blade; the fallback is hosting the frontend on a second
+App Service (Node 22) using the same standalone build (`node server.js`).
+
+### Supabase
 
 Authentication → URL Configuration:
 
-- Site URL: `https://nutrimess.vercel.app`
-- Redirect URLs: add `https://nutrimess.vercel.app/**` and
-  `https://nutrimess-*.vercel.app/**` (keep the localhost entry for dev)
+- Site URL: `https://kind-coast-021723100.1.azurestaticapps.net`
+- Redirect URLs: `https://kind-coast-021723100.1.azurestaticapps.net/**`,
+  `https://kind-coast-021723100-*.azurestaticapps.net/**` (PR previews),
+  `http://localhost:3000/**`
 
-Authentication → Providers → Email: enable **Confirm email** for production
-and configure **custom SMTP** (e.g. Resend, Brevo; both have free tiers).
-The built-in mailer's hourly limit is far too low for a campus launch.
-
-Authentication → Attack Protection: enable **leaked password protection**.
+Authentication → Providers → Email: enable **Confirm email** and set up
+**custom SMTP** (Resend/Brevo free tiers); the built-in mailer only sends a
+few emails per hour. Attack Protection: enable **leaked password protection**.
 
 ### Google sign-in
 
-1. Google Cloud Console → APIs & Services → Credentials → **Create OAuth
-   client ID** → type **Web application**.
-2. Authorized JavaScript origins: `https://nutrimess.vercel.app`,
-   `http://localhost:3000`.
-3. Authorized redirect URI:
-   `https://zvepctjxrvdtoyatpzqh.supabase.co/auth/v1/callback`
-4. Copy the client secret **immediately** (Google only shows it once).
-5. Supabase → Providers → Google: put the web client ID in **Client IDs**
-   (first if there are several) and the secret in **Client Secret (for OAuth)**.
+Google Cloud Console → Credentials → your **Web application** OAuth client:
 
-`invalid_client` / "Unable to exchange external code" in the logs means the
-secret doesn't belong to that client ID; generate a new secret and re-paste.
+- Authorized JavaScript origins: `https://kind-coast-021723100.1.azurestaticapps.net`,
+  `http://localhost:3000`
+- Authorized redirect URI: `https://zvepctjxrvdtoyatpzqh.supabase.co/auth/v1/callback`
 
-## 4. QR codes
+Supabase → Providers → Google: the web client ID in **Client IDs** (first),
+its secret in **Client Secret (for OAuth)**. `invalid_client` in the auth
+logs means the secret doesn't match that client ID; add a new secret in
+Google (it's shown only once) and re-paste.
+
+## QR codes
+
+`qr/` targets the Azure URL. If the app moves (e.g. a custom domain):
 
 ```bash
 pip install -r scripts/requirements.txt
-python scripts/generate_qr.py --url https://nutrimess.vercel.app
+python scripts/generate_qr.py --url https://your-domain
 ```
 
-Outputs go to `qr/`. The committed files already target
-`https://nutrimess.vercel.app`; rerun with the real URL if it differs.
+## Post-deploy checklist
 
-## 5. Post-deploy checklist
-
-- [ ] `/api/health` on Render returns healthy
-- [ ] Open the Vercel URL on a phone → login page loads
-- [ ] Register with email → confirmation email arrives → sign in → dashboard
+- [ ] Backend workflow ends with "Backend healthy"
+- [ ] Frontend workflow succeeds; the Azure URL shows the NutriMess login page
+- [ ] Register with email → confirmation email → sign in → dashboard
 - [ ] Google sign-in → "Choose your Bhawan" → dashboard
-- [ ] Secretary: upload a menu photo → AI extracts → publish → student sees it
-- [ ] Scan a plate → items detected → log → appears in My Nutrition
-- [ ] AI assistant answers with dishes from the published menu
-- [ ] Two phones in one bhawan see each other's chat messages live
-- [ ] Android Chrome shows "Install NutriMess"; iOS Safari Share → Add to Home Screen
-- [ ] Scan a bhawan poster QR → register page with that bhawan preselected
-- [ ] Run `database/tests/rls_audit.sql` → `RLS audit passed`
-- [ ] Supabase advisors (Security) show no new findings
+- [ ] Secretary: upload menu photo → AI extracts → publish → student sees it
+- [ ] Scan a plate → foods detected → log → appears in My Nutrition
+- [ ] AI assistant answers using dishes from the published menu
+- [ ] Two phones in one bhawan see each other's chat live
+- [ ] Android Chrome offers "Install NutriMess"; iOS Safari → Add to Home Screen
+- [ ] A bhawan poster QR opens /register with that bhawan selected
+- [ ] `database/tests/rls_audit.sql` → `RLS audit passed`
+
+## Troubleshooting
+
+| Symptom | Check |
+|---------|-------|
+| Azure placeholder page / 404 on `/login` | Frontend workflow failed or `app_location` isn't `frontend` |
+| Pages load but sign-in or data fails | `NEXT_PUBLIC_*` missing at build time (workflow `env`) or in SWA env vars |
+| "Could not reach the NutriMess server" | Backend down: App Service → Log stream; check startup command and app settings |
+| Browser console CORS error | `CORS_ORIGINS` on the backend doesn't include the exact frontend origin |
+| AI features return 503 | `GEMINI_API_KEY` missing in App Service settings |
+| Backend deploy 401 | Publish profile reset or SCM basic auth disabled; update the secret |

@@ -31,9 +31,10 @@ Verify access control with `database/tests/rls_audit.sql`; it should end with
 
 Authentication → URL Configuration:
 
-- **Site URL:** `http://localhost:3000` (production: `https://nutrimess.vercel.app`)
-- **Redirect URLs:** `http://localhost:3000/**`, `https://nutrimess.vercel.app/**`,
-  `https://nutrimess-*.vercel.app/**` (preview deployments)
+- **Site URL:** `http://localhost:3000` (production: `https://kind-coast-021723100.1.azurestaticapps.net`)
+- **Redirect URLs:** `http://localhost:3000/**`,
+  `https://kind-coast-021723100.1.azurestaticapps.net/**`,
+  `https://kind-coast-021723100-*.azurestaticapps.net/**` (PR previews)
 
 Authentication → Providers → Email: while developing, turn off **Confirm
 email** or configure custom SMTP. Supabase's built-in mailer only sends a

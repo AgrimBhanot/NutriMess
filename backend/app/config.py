@@ -14,8 +14,8 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     gemini_model: str = "gemini-2.5-flash"
 
-    # CORS: comma-separated origins, plus an optional regex for Vercel
-    # preview deployments (e.g. https://nutrimess-.*\.vercel\.app)
+    # CORS: comma-separated origins, plus an optional regex for preview
+    # deployments (Azure Static Web Apps PR environments)
     cors_origins: str = "http://localhost:3000"
     cors_origin_regex: str | None = None
 
