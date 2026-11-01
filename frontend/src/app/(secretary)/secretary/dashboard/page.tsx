@@ -1,12 +1,13 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
+import { connection } from "next/server";
+import { getCurrentProfile } from "@/lib/supabase/profile";
+import { istToday, weekMonday } from "@/lib/week";
 import {
   Upload,
   MessageCircle,
   AlertCircle,
   BarChart3,
   Users,
-  Star,
+  UtensilsCrossed,
 } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -16,27 +17,36 @@ export const metadata: Metadata = {
 };
 
 export default async function SecretaryDashboardPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  await connection();
+  const { supabase, profile } = await getCurrentProfile();
+  const bhawan = profile.bhawans;
 
-  if (!user) redirect("/login");
+  const [{ count: studentCount }, { data: complaints }, { data: thisWeekMenu }] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("bhawan_id", profile.bhawan_id)
+        .eq("role", "student"),
+      supabase.rpc("get_bhawan_complaints"),
+      supabase
+        .from("menus")
+        .select("status")
+        .eq("bhawan_id", profile.bhawan_id)
+        .eq("week_start", weekMonday(istToday()))
+        .maybeSingle(),
+    ]);
+  const openComplaints = ((complaints ?? []) as { status: string }[]).filter(
+    (c) => c.status !== "resolved"
+  ).length;
+  const menuStatus = thisWeekMenu?.status ?? "missing";
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*, bhawans(name, code)")
-    .eq("id", user.id)
-    .single();
-
-  const bhawan = profile?.bhawans as unknown as { name: string; code: string } | null;
-
-  const today = new Date();
-  const dateStr = today.toLocaleDateString("en-IN", {
+  const dateStr = new Date().toLocaleDateString("en-IN", {
     weekday: "long",
     day: "numeric",
     month: "short",
     year: "numeric",
+    timeZone: "Asia/Kolkata",
   });
 
   return (
@@ -54,25 +64,42 @@ export default async function SecretaryDashboardPage() {
         <div className="rounded-2xl border border-[#E5E7EB] bg-white p-4 card-shadow">
           <div className="flex items-center gap-2 mb-2">
             <Users className="h-4 w-4 text-[#9CA3AF] stroke-[1.5px]" />
-            <span className="text-xs text-[#9CA3AF]">Active Students</span>
+            <span className="text-xs text-[#9CA3AF]">Registered Students</span>
           </div>
           <span className="text-2xl font-semibold text-[#111827] tabular-nums">
-            --
+            {studentCount ?? 0}
           </span>
-          <span className="text-xs text-[#9CA3AF] ml-1">/ --</span>
         </div>
 
-        <div className="rounded-2xl border border-[#E5E7EB] bg-white p-4 card-shadow">
+        <Link
+          href="/secretary/complaints"
+          className="rounded-2xl border border-[#E5E7EB] bg-white p-4 card-shadow"
+        >
           <div className="flex items-center gap-2 mb-2">
-            <Star className="h-4 w-4 text-[#9CA3AF] stroke-[1.5px]" />
-            <span className="text-xs text-[#9CA3AF]">Satisfaction</span>
+            <AlertCircle className="h-4 w-4 text-[#9CA3AF] stroke-[1.5px]" />
+            <span className="text-xs text-[#9CA3AF]">Open Complaints</span>
           </div>
-          <span className="text-2xl font-semibold text-[#111827] tabular-nums">
-            --
+          <span
+            className={`text-2xl font-semibold tabular-nums ${openComplaints > 0 ? "text-[#BA5D38]" : "text-[#111827]"}`}
+          >
+            {openComplaints}
           </span>
-          <span className="text-xs text-[#9CA3AF] ml-1">/ 5.0</span>
-        </div>
+        </Link>
       </div>
+
+      {menuStatus !== "published" && (
+        <Link
+          href="/secretary/menu-upload"
+          className="flex items-center gap-3 rounded-2xl border border-[#BA5D38]/20 bg-[#BA5D38]/5 p-4"
+        >
+          <UtensilsCrossed className="h-5 w-5 shrink-0 stroke-[1.5px] text-[#BA5D38]" />
+          <span className="text-sm text-[#BA5D38]">
+            {menuStatus === "draft"
+              ? "This week's menu is still a draft. Publish it so students can see it."
+              : "This week's menu hasn't been uploaded yet."}
+          </span>
+        </Link>
+      )}
 
       {/* Quick actions */}
       <div className="space-y-3">

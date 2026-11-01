@@ -1,157 +1,117 @@
-"use client";
+import { connection } from "next/server";
+import Link from "next/link";
+import type { Metadata } from "next";
+import { BadgeCheck, ChevronRight, LayoutDashboard } from "lucide-react";
+import {
+  ACTIVITY_LEVELS,
+  DIET_PREFERENCES,
+  GOALS,
+} from "@/lib/constants";
+import { getCurrentProfile } from "@/lib/supabase/profile";
+import { SignOutButton } from "@/components/layout/sign-out-button";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { LogOut, ChevronRight, Shield } from "lucide-react";
-import type { Profile, Bhawan } from "@/types";
+export const metadata: Metadata = {
+  title: "Profile",
+};
 
-export default function ProfilePage() {
-  const router = useRouter();
-  const [profile, setProfile] = useState<
-    (Profile & { bhawans: Bhawan }) | null
-  >(null);
-  const [loading, setLoading] = useState(true);
+function labelFor(
+  options: readonly { value: string; label: string }[],
+  value: string | null
+): string {
+  return options.find((o) => o.value === value)?.label ?? "Not set";
+}
 
-  useEffect(() => {
-    async function fetchProfile() {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) {
-        router.push("/login");
-        return;
-      }
+export default async function ProfilePage() {
+  await connection();
+  const { profile } = await getCurrentProfile();
+  const isSecretary = profile.role === "secretary" || profile.role === "admin";
 
-      const { data } = await supabase
-        .from("profiles")
-        .select("*, bhawans(*)")
-        .eq("id", user.id)
-        .single();
-
-      if (data) setProfile(data as Profile & { bhawans: Bhawan });
-      setLoading(false);
-    }
-    fetchProfile();
-  }, [router]);
-
-  async function handleSignOut() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
-  }
-
-  if (loading) {
-    return (
-      <div className="space-y-4 animate-pulse">
-        <div className="h-20 rounded-2xl bg-[#F3F4F6]" />
-        <div className="h-40 rounded-2xl bg-[#F3F4F6]" />
-        <div className="h-32 rounded-2xl bg-[#F3F4F6]" />
-      </div>
-    );
-  }
+  const details = [
+    { label: "Diet", value: labelFor(DIET_PREFERENCES, profile.diet_preference) },
+    { label: "Goal", value: labelFor(GOALS, profile.goal) },
+    { label: "Activity", value: labelFor(ACTIVITY_LEVELS, profile.activity_level) },
+    { label: "Age", value: profile.age ? `${profile.age} yrs` : "Not set" },
+    { label: "Height", value: profile.height_cm ? `${profile.height_cm} cm` : "Not set" },
+    { label: "Weight", value: profile.weight_kg ? `${profile.weight_kg} kg` : "Not set" },
+  ];
 
   return (
     <div className="space-y-6">
       {/* Profile header */}
       <div className="flex items-center gap-4 rounded-2xl border border-[#E5E7EB] bg-white p-4 card-shadow">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#244E3D] text-lg font-semibold text-white">
-          {profile?.full_name?.charAt(0)?.toUpperCase() || "U"}
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#244E3D] text-lg font-semibold text-white">
+          {profile.full_name.charAt(0).toUpperCase() || "U"}
         </div>
-        <div className="flex-1">
-          <h2 className="text-base font-semibold text-[#111827]">
-            {profile?.full_name}
+        <div className="min-w-0 flex-1">
+          <h2 className="truncate text-base font-semibold text-[#111827]">
+            {profile.full_name}
           </h2>
-          <p className="text-sm text-[#9CA3AF]">{profile?.email}</p>
-          <div className="flex items-center gap-2 mt-1">
-            <Badge
-              variant="secondary"
-              className="rounded-full text-xs capitalize"
-            >
-              {profile?.role}
-            </Badge>
-            {profile?.role === "secretary" && (
-              <Badge className="rounded-full bg-[#244E3D]/10 text-[#244E3D] text-xs gap-1">
-                <Shield className="h-3 w-3" />
-                Verified
-              </Badge>
+          <p className="truncate text-sm text-[#9CA3AF]">{profile.email}</p>
+          <div className="mt-1 flex items-center gap-2">
+            <span className="rounded-full bg-[#F3F4F6] px-2 py-0.5 text-xs font-medium capitalize text-[#4B5563]">
+              {profile.role}
+            </span>
+            {isSecretary && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#BA5D38]/10 px-2 py-0.5 text-xs font-medium text-[#BA5D38]">
+                <BadgeCheck className="h-3 w-3 stroke-[1.5px]" />
+                Verified Secretary
+              </span>
             )}
           </div>
         </div>
       </div>
 
+      {isSecretary && (
+        <Link
+          href="/secretary/dashboard"
+          className="flex items-center gap-3 rounded-2xl border border-[#244E3D]/20 bg-[#244E3D]/5 p-4"
+        >
+          <LayoutDashboard className="h-5 w-5 stroke-[1.5px] text-[#244E3D]" />
+          <span className="flex-1 text-sm font-medium text-[#244E3D]">
+            Go to Secretary Portal
+          </span>
+          <ChevronRight className="h-4 w-4 stroke-[1.5px] text-[#244E3D]" />
+        </Link>
+      )}
+
       {/* Bhawan info */}
       <div className="rounded-2xl border border-[#E5E7EB] bg-white p-4 card-shadow">
-        <h3 className="text-sm font-semibold text-[#111827] mb-3">
-          My Bhawan
-        </h3>
+        <h3 className="mb-3 text-sm font-semibold text-[#111827]">My Bhawan</h3>
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#244E3D] text-sm font-semibold text-white">
-            {profile?.bhawans?.code}
+            {profile.bhawans?.code}
           </div>
           <div>
             <p className="text-sm font-medium text-[#111827]">
-              {profile?.bhawans?.name}
+              {profile.bhawans?.name}
             </p>
-            <p className="text-xs text-[#9CA3AF]">
-              {profile?.bhawans?.description}
-            </p>
+            {profile.bhawans?.description && (
+              <p className="text-xs text-[#9CA3AF]">
+                {profile.bhawans.description}
+              </p>
+            )}
           </div>
         </div>
       </div>
 
       {/* Nutrition profile */}
       <div className="rounded-2xl border border-[#E5E7EB] bg-white p-4 card-shadow">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-[#111827]">
-            Nutrition Profile
-          </h3>
-          <button className="flex items-center gap-1 text-xs text-[#244E3D] font-medium">
-            Edit
-            <ChevronRight className="h-3 w-3" />
-          </button>
-        </div>
+        <h3 className="mb-3 text-sm font-semibold text-[#111827]">
+          Nutrition Profile
+        </h3>
         <div className="grid grid-cols-2 gap-3 text-sm">
-          <div>
-            <span className="text-[#9CA3AF] text-xs">Diet</span>
-            <p className="font-medium text-[#4B5563] capitalize">
-              {profile?.diet_preference?.replace("_", "-") || "Not set"}
-            </p>
-          </div>
-          <div>
-            <span className="text-[#9CA3AF] text-xs">Goal</span>
-            <p className="font-medium text-[#4B5563] capitalize">
-              {profile?.goal?.replace("_", " ") || "Not set"}
-            </p>
-          </div>
-          <div>
-            <span className="text-[#9CA3AF] text-xs">Activity</span>
-            <p className="font-medium text-[#4B5563] capitalize">
-              {profile?.activity_level?.replace("_", " ") || "Not set"}
-            </p>
-          </div>
-          <div>
-            <span className="text-[#9CA3AF] text-xs">Weight</span>
-            <p className="font-medium text-[#4B5563] tabular-nums">
-              {profile?.weight_kg ? `${profile.weight_kg} kg` : "Not set"}
-            </p>
-          </div>
+          {details.map((d) => (
+            <div key={d.label}>
+              <span className="text-xs text-[#9CA3AF]">{d.label}</span>
+              <p className="font-medium tabular-nums text-[#4B5563]">
+                {d.value}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Sign out */}
-      <Button
-        variant="outline"
-        onClick={handleSignOut}
-        className="w-full h-11 rounded-xl border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 gap-2"
-      >
-        <LogOut className="h-4 w-4" />
-        Sign Out
-      </Button>
+      <SignOutButton />
     </div>
   );
 }

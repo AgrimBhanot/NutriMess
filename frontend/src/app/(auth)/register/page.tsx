@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { BHAWANS, DIET_PREFERENCES } from "@/lib/constants";
+import { DIET_PREFERENCES } from "@/lib/constants";
 import { Loader2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -94,21 +94,44 @@ function RegisterForm() {
       }
     }
 
+    // The DB trigger re-verifies the hash before granting the secretary role,
+    // so the check above is only for a friendly error message.
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: email.trim(),
       password,
       options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
         data: {
           full_name: fullName.trim(),
           bhawan_id: selectedBhawan,
           role: isSecretary ? "secretary" : "student",
+          secretary_hash: isSecretary ? secretaryHash.trim() : undefined,
           diet_preference: dietPreference,
         },
       },
     });
 
     if (signUpError) {
-      setError(signUpError.message);
+      console.error("Sign up failed:", signUpError.code, signUpError.message);
+      if (signUpError.code === "over_email_send_rate_limit") {
+        setError(
+          "Too many sign-up emails were sent recently. Please wait a while and try again."
+        );
+      } else if (signUpError.code === "user_already_exists") {
+        setError("An account with this email already exists. Please sign in.");
+      } else if (signUpError.code === "weak_password") {
+        setError("Please choose a stronger password (at least 6 characters).");
+      } else {
+        setError(signUpError.message);
+      }
+      setLoading(false);
+      return;
+    }
+
+    // With email confirmation on, Supabase returns a user without identities
+    // when the email is already registered (to avoid leaking accounts).
+    if (signUpData.user && signUpData.user.identities?.length === 0) {
+      setError("An account with this email already exists. Please sign in.");
       setLoading(false);
       return;
     }
@@ -118,7 +141,7 @@ function RegisterForm() {
       return;
     }
 
-    router.push("/dashboard");
+    router.push("/");
     router.refresh();
   }
 

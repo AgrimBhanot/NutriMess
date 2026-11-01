@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/supabase/profile";
+import { BottomNav } from "@/components/layout/bottom-nav";
 
 export default async function SecretaryLayout({
   children,
@@ -8,31 +9,14 @@ export default async function SecretaryLayout({
   children: React.ReactNode;
 }) {
   await connection();
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { profile } = await getCurrentProfile();
 
-  if (!user) {
-    redirect("/login");
-  }
-
-  // Verify secretary role
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, bhawans(name, code)")
-    .eq("id", user.id)
-    .single();
-
-  if (profile?.role !== "secretary" && profile?.role !== "admin") {
+  if (profile.role !== "secretary" && profile.role !== "admin") {
     redirect("/dashboard");
   }
 
-  const bhawanData = profile?.bhawans as unknown as
-    | { name: string; code: string }
-    | null;
-  const bhawanName = bhawanData?.name ?? "Secretary";
-  const bhawanCode = bhawanData?.code ?? "";
+  const bhawanName = profile.bhawans?.name ?? "Secretary";
+  const bhawanCode = profile.bhawans?.code ?? "";
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -61,9 +45,10 @@ export default async function SecretaryLayout({
         </div>
       </header>
 
-      <main className="flex-1">
+      <main className="flex-1 pb-20">
         <div className="mx-auto max-w-lg px-4 py-4">{children}</div>
       </main>
+      <BottomNav variant="secretary" />
     </div>
   );
 }

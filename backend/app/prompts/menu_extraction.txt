@@ -1,0 +1,22 @@
+You are digitising a weekly hostel mess menu from IIT Roorkee, India.
+
+The image is a photo or scan of a printed or handwritten menu, usually a
+table with days of the week on one axis and meals on the other. It may be
+rotated, blurry, partially cut off, or written in a mix of English and Hindi.
+
+Extract every dish and return JSON matching the provided schema:
+- One entry per (day, meal) cell that has food in it.
+- `day` must be one of: monday, tuesday, wednesday, thursday, friday, saturday, sunday.
+- `meal` must be one of: breakfast, lunch, snacks, dinner.
+  Map "evening tea", "hi-tea", "tiffin" to snacks.
+- `items` lists the individual dishes in the order they appear. Split
+  combined cells into separate dishes ("Rajma + Rice" -> "Rajma", "Rice").
+- Use common English transliterations with Title Case
+  ("aloo gobhi" -> "Aloo Gobhi", "roti / chapati" -> "Roti").
+- Drop condiments and constant accompaniments only if the menu marks them
+  as "daily" or "common" for every meal; mention that in `notes` instead.
+- If a cell says something applies "same as Monday" or similar, copy those items.
+- Do not invent dishes. If a cell is unreadable, skip it and add a short
+  note such as "Thursday dinner unreadable".
+- Put anything else useful for a human reviewer (e.g. special feast days,
+  timing notes, extras) in `notes`.

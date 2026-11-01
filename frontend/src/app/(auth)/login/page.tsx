@@ -31,9 +31,12 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
+  const [resendState, setResendState] = useState<"idle" | "sent">("idle");
 
   const queryMessage = searchParams.get("message");
   const queryError = searchParams.get("error");
+  const queryReason = searchParams.get("reason");
 
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -58,15 +61,16 @@ function LoginForm() {
     });
 
     if (signInError) {
-      console.error("Login failed:", signInError.message);
-      if (signInError.message.toLowerCase().includes("email not confirmed")) {
+      console.error("Login failed:", signInError.code, signInError.message);
+      if (signInError.code === "email_not_confirmed") {
+        setNeedsConfirmation(true);
         setError(
-          "Your email has not been confirmed yet. Please verify your email via the link sent to your inbox, or disable 'Confirm email' in Supabase Auth settings."
+          "Your email has not been confirmed yet. Open the link we sent to your inbox, or resend it below."
         );
-      } else if (
-        signInError.message.toLowerCase().includes("invalid login credentials")
-      ) {
+      } else if (signInError.code === "invalid_credentials") {
         setError("Invalid email or password. Please check your credentials or create an account.");
+      } else if (signInError.status === 429) {
+        setError("Too many attempts. Please wait a minute and try again.");
       } else {
         setError(signInError.message);
       }
@@ -74,8 +78,30 @@ function LoginForm() {
       return;
     }
 
-    router.push("/dashboard");
+    // "/" routes students to /dashboard and secretaries to their portal
+    router.push(data.session ? "/" : "/login");
     router.refresh();
+  }
+
+  async function handleResendConfirmation() {
+    setLoading(true);
+    const supabase = createClient();
+    const { error: resendError } = await supabase.auth.resend({
+      type: "signup",
+      email: email.trim(),
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+    });
+    setLoading(false);
+    if (resendError) {
+      setError(
+        resendError.status === 429
+          ? "Email limit reached. Please wait a while before requesting another link."
+          : resendError.message
+      );
+      return;
+    }
+    setResendState("sent");
+    setError(null);
   }
 
   async function handleGoogleLogin() {
@@ -110,7 +136,17 @@ function LoginForm() {
       )}
       {queryError && (
         <div className="rounded-xl bg-red-50 p-3.5 text-sm text-red-600 border border-red-200">
-          Authentication failed. Please try again.
+          {queryError === "link_expired"
+            ? "That link is invalid or has already been used. If you confirmed your email, just sign in below."
+            : queryError === "oauth"
+              ? `Google sign-in failed: ${queryReason ?? "unknown error"}. Please try again or use email.`
+              : "Authentication failed. Please try again."}
+        </div>
+      )}
+      {resendState === "sent" && (
+        <div className="flex items-start gap-2.5 rounded-xl bg-emerald-50 p-3.5 text-sm text-emerald-800 border border-emerald-200">
+          <Info className="h-4 w-4 mt-0.5 shrink-0 text-emerald-600" />
+          <span>Confirmation email sent. Check your inbox (and spam folder).</span>
         </div>
       )}
       {/* Brand */}
@@ -203,6 +239,17 @@ function LoginForm() {
           <p className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
             {error}
           </p>
+        )}
+
+        {needsConfirmation && resendState === "idle" && (
+          <button
+            type="button"
+            onClick={handleResendConfirmation}
+            disabled={loading}
+            className="w-full text-sm font-medium text-[#244E3D] hover:underline disabled:opacity-50"
+          >
+            Resend confirmation email
+          </button>
         )}
 
         <Button

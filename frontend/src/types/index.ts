@@ -96,8 +96,9 @@ export interface ChatMessage {
   image_url: string | null;
   reply_to: string | null;
   created_at: string;
-  // Joined fields
-  profile?: Pick<Profile, "full_name" | "avatar_url" | "role">;
+  // Denormalised by a DB trigger on insert
+  author_name: string | null;
+  author_role: UserRole | null;
 }
 
 // ============================================
@@ -185,6 +186,37 @@ export interface Complaint {
   updated_at: string;
 }
 
+/** Row returned by the `get_bhawan_complaints` RPC (secretary view). */
+export interface BhawanComplaint {
+  id: string;
+  category: ComplaintCategory;
+  description: string;
+  image_url: string | null;
+  is_anonymous: boolean;
+  status: ComplaintStatus;
+  secretary_response: string | null;
+  responded_at: string | null;
+  created_at: string;
+  reporter_name: string | null;
+}
+
+// ============================================
+// Menu extraction (FastAPI)
+// ============================================
+
+export interface EditableMenuItem {
+  day: DayOfWeek;
+  meal: MealType;
+  item_name: string;
+  item_order: number;
+}
+
+export interface MenuExtraction {
+  items: EditableMenuItem[];
+  warnings: string[];
+  model: string;
+}
+
 // ============================================
 // Daily nutrition summary (computed)
 // ============================================
@@ -201,4 +233,52 @@ export interface DailyNutritionSummary {
   target_protein: number;
   target_carbs: number;
   target_fat: number;
+}
+
+// ============================================
+// Plate analysis (FastAPI)
+// ============================================
+
+export interface Macros {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber: number;
+}
+
+export interface NutrientLine {
+  food_name: string;
+  food_id: string | null;
+  matched: boolean;
+  /** Food database source, or "ai_estimate" when the dish wasn't found */
+  source: string;
+  portion: PortionSize;
+  grams: number;
+  default_grams: number;
+  serving_unit: string | null;
+  per_100g: Macros;
+  nutrients: Macros;
+  confidence: number;
+}
+
+export type AnalysisConfidence = "low" | "moderate" | "high";
+
+export interface PlateAnalysis {
+  is_food: boolean;
+  items: NutrientLine[];
+  totals: Macros;
+  confidence: AnalysisConfidence;
+  notes: string[];
+  model: string;
+}
+
+export interface FoodRecord {
+  id: string | null;
+  name: string;
+  category: string | null;
+  default_serving_unit: string | null;
+  default_grams: number;
+  per_100g: Macros;
+  source: string | null;
 }

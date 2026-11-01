@@ -88,3 +88,22 @@ export const GOALS = [
 
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+// ============================================
+// Complaints
+// ============================================
+
+export const COMPLAINT_CATEGORIES = [
+  { value: "food_quality", label: "Food Quality" },
+  { value: "hygiene", label: "Hygiene" },
+  { value: "quantity", label: "Quantity" },
+  { value: "menu", label: "Menu" },
+  { value: "other", label: "Other" },
+] as const;
+
+export const COMPLAINT_STATUSES = [
+  { value: "open", label: "Open" },
+  { value: "acknowledged", label: "Acknowledged" },
+  { value: "in_progress", label: "In Progress" },
+  { value: "resolved", label: "Resolved" },
+] as const;

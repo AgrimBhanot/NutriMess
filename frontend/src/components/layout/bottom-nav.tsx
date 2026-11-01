@@ -8,24 +8,39 @@ import {
   ScanLine,
   MessageCircle,
   User,
+  Upload,
+  AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const NAV_ITEMS = [
-  { href: "/dashboard", label: "Home", icon: Home },
-  { href: "/menu", label: "Menu", icon: UtensilsCrossed },
-  { href: "/scan", label: "Scan", icon: ScanLine },
-  { href: "/chat", label: "Chat", icon: MessageCircle },
-  { href: "/profile", label: "Profile", icon: User },
-] as const;
+const NAV_ITEMS = {
+  student: [
+    { href: "/dashboard", label: "Home", icon: Home },
+    { href: "/menu", label: "Menu", icon: UtensilsCrossed },
+    { href: "/scan", label: "Scan", icon: ScanLine },
+    { href: "/chat", label: "Chat", icon: MessageCircle },
+    { href: "/profile", label: "Profile", icon: User },
+  ],
+  secretary: [
+    { href: "/secretary/dashboard", label: "Home", icon: Home },
+    { href: "/secretary/menu-upload", label: "Menu", icon: Upload },
+    { href: "/secretary/chat", label: "Chat", icon: MessageCircle },
+    { href: "/secretary/complaints", label: "Complaints", icon: AlertCircle },
+    { href: "/profile", label: "Profile", icon: User },
+  ],
+} as const;
 
-export function BottomNav() {
+export function BottomNav({
+  variant = "student",
+}: {
+  variant?: keyof typeof NAV_ITEMS;
+}) {
   const pathname = usePathname();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-white/95 backdrop-blur-md safe-area-pb">
       <div className="mx-auto flex h-16 max-w-lg items-center justify-around px-2">
-        {NAV_ITEMS.map((item) => {
+        {NAV_ITEMS[variant].map((item) => {
           const isActive =
             pathname === item.href || pathname.startsWith(item.href + "/");
           const Icon = item.icon;

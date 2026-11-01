@@ -42,32 +42,54 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith(route)
   );
 
+  const redirectTo = (path: string) => {
+    const url = request.nextUrl.clone();
+    url.pathname = path;
+    url.search = "";
+    const response = NextResponse.redirect(url);
+    // Keep any refreshed auth cookies on the redirect
+    supabaseResponse.cookies
+      .getAll()
+      .forEach((cookie) => response.cookies.set(cookie));
+    return response;
+  };
+
   // If user is not authenticated and trying to access protected routes
-  if (!user && !isPublicRoute && pathname !== "/") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
+  if (!user && !isPublicRoute) {
+    return redirectTo("/login");
   }
 
-  // If user is authenticated and trying to access auth pages, redirect to dashboard
-  if (user && isPublicRoute) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
+  // Signed-in users skip login/register; "/" routes them by role
+  if (user && isPublicRoute && !pathname.startsWith("/auth/callback")) {
+    return redirectTo("/");
   }
 
-  // If user is authenticated, check their role for route access
-  if (user && pathname.startsWith("/secretary")) {
+  if (user && !isPublicRoute) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, bhawan_id")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
 
-    if (profile?.role !== "secretary" && profile?.role !== "admin") {
-      const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
-      return NextResponse.redirect(url);
+    // Google OAuth sign-ups (or a failed profile trigger) have no bhawan yet
+    const needsOnboarding = !profile?.bhawan_id;
+    if (needsOnboarding && pathname !== "/onboarding") {
+      return redirectTo("/onboarding");
+    }
+    if (!needsOnboarding && pathname === "/onboarding") {
+      return redirectTo("/");
+    }
+
+    const isSecretary =
+      profile?.role === "secretary" || profile?.role === "admin";
+
+    // Route "/" here rather than in a page that only calls redirect():
+    // that pattern trips Next 16's dev-mode "negative time stamp" error.
+    if (pathname === "/" && !needsOnboarding) {
+      return redirectTo(isSecretary ? "/secretary/dashboard" : "/dashboard");
+    }
+    if (pathname.startsWith("/secretary") && !isSecretary) {
+      return redirectTo("/dashboard");
     }
   }
 

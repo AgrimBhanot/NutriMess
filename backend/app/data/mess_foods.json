@@ -1,0 +1,634 @@
+{
+ "_comment": "Extra IITR mess dishes merged with food_items from the DB. Per-100g values; DB rows win on name clashes.",
+ "foods": [
+  {
+   "name": "Dal Makhani",
+   "category": "dal",
+   "default_serving_unit": "katori",
+   "default_grams": 150,
+   "calories_per_100g": 140,
+   "protein_per_100g": 6,
+   "carbs_per_100g": 14,
+   "fat_per_100g": 7,
+   "fiber_per_100g": 4,
+   "aliases": [
+    "dal makhni",
+    "maa ki dal"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Dal Tadka",
+   "category": "dal",
+   "default_serving_unit": "katori",
+   "default_grams": 150,
+   "calories_per_100g": 115,
+   "protein_per_100g": 6.5,
+   "carbs_per_100g": 15,
+   "fat_per_100g": 3.5,
+   "fiber_per_100g": 3,
+   "aliases": [
+    "tadka dal",
+    "yellow dal",
+    "dal fry"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Kadhi Pakora",
+   "category": "dal",
+   "default_serving_unit": "katori",
+   "default_grams": 150,
+   "calories_per_100g": 110,
+   "protein_per_100g": 4,
+   "carbs_per_100g": 10,
+   "fat_per_100g": 6,
+   "fiber_per_100g": 1,
+   "aliases": [
+    "kadhi",
+    "kadi",
+    "kadhi chawal"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Chana Masala",
+   "category": "dal",
+   "default_serving_unit": "katori",
+   "default_grams": 150,
+   "calories_per_100g": 150,
+   "protein_per_100g": 7.5,
+   "carbs_per_100g": 19,
+   "fat_per_100g": 5,
+   "fiber_per_100g": 5,
+   "aliases": [
+    "kala chana",
+    "black chana"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Soya Chunks Curry",
+   "category": "vegetable",
+   "default_serving_unit": "katori",
+   "default_grams": 120,
+   "calories_per_100g": 145,
+   "protein_per_100g": 13,
+   "carbs_per_100g": 11,
+   "fat_per_100g": 5.5,
+   "fiber_per_100g": 4,
+   "aliases": [
+    "soyabean",
+    "soya",
+    "nutrela"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Aloo Matar",
+   "category": "vegetable",
+   "default_serving_unit": "katori",
+   "default_grams": 120,
+   "calories_per_100g": 95,
+   "protein_per_100g": 3,
+   "carbs_per_100g": 14,
+   "fat_per_100g": 3.5,
+   "fiber_per_100g": 3,
+   "aliases": [
+    "matar aloo",
+    "potato peas"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Kadai Paneer",
+   "category": "vegetable",
+   "default_serving_unit": "katori",
+   "default_grams": 120,
+   "calories_per_100g": 210,
+   "protein_per_100g": 11,
+   "carbs_per_100g": 7,
+   "fat_per_100g": 15,
+   "fiber_per_100g": 1.5,
+   "aliases": [
+    "karahi paneer"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Paneer Butter Masala",
+   "category": "vegetable",
+   "default_serving_unit": "katori",
+   "default_grams": 120,
+   "calories_per_100g": 230,
+   "protein_per_100g": 10,
+   "carbs_per_100g": 9,
+   "fat_per_100g": 17,
+   "fiber_per_100g": 1,
+   "aliases": [
+    "butter paneer",
+    "paneer makhani"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Malai Kofta",
+   "category": "vegetable",
+   "default_serving_unit": "katori",
+   "default_grams": 120,
+   "calories_per_100g": 210,
+   "protein_per_100g": 5,
+   "carbs_per_100g": 14,
+   "fat_per_100g": 15,
+   "fiber_per_100g": 1.5,
+   "aliases": [
+    "kofta"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Veg Biryani",
+   "category": "grain",
+   "default_serving_unit": "plate",
+   "default_grams": 250,
+   "calories_per_100g": 150,
+   "protein_per_100g": 3.5,
+   "carbs_per_100g": 24,
+   "fat_per_100g": 4.5,
+   "fiber_per_100g": 1.5,
+   "aliases": [
+    "vegetable biryani",
+    "veg pulao",
+    "pulao"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Chicken Biryani",
+   "category": "non_veg",
+   "default_serving_unit": "plate",
+   "default_grams": 300,
+   "calories_per_100g": 170,
+   "protein_per_100g": 9,
+   "carbs_per_100g": 20,
+   "fat_per_100g": 6,
+   "fiber_per_100g": 1,
+   "aliases": [
+    "biryani"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Egg Bhurji",
+   "category": "non_veg",
+   "default_serving_unit": "katori",
+   "default_grams": 100,
+   "calories_per_100g": 190,
+   "protein_per_100g": 12,
+   "carbs_per_100g": 3,
+   "fat_per_100g": 14,
+   "fiber_per_100g": 0.5,
+   "aliases": [
+    "anda bhurji",
+    "scrambled egg"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Omelette",
+   "category": "non_veg",
+   "default_serving_unit": "piece",
+   "default_grams": 70,
+   "calories_per_100g": 175,
+   "protein_per_100g": 11,
+   "carbs_per_100g": 2,
+   "fat_per_100g": 13.5,
+   "fiber_per_100g": 0.3,
+   "aliases": [
+    "egg omelette",
+    "masala omelette"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Butter Chicken",
+   "category": "non_veg",
+   "default_serving_unit": "katori",
+   "default_grams": 150,
+   "calories_per_100g": 190,
+   "protein_per_100g": 14,
+   "carbs_per_100g": 6,
+   "fat_per_100g": 12,
+   "fiber_per_100g": 0.5,
+   "aliases": [
+    "chicken makhani"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Aloo Paratha",
+   "category": "grain",
+   "default_serving_unit": "piece",
+   "default_grams": 100,
+   "calories_per_100g": 250,
+   "protein_per_100g": 5.5,
+   "carbs_per_100g": 35,
+   "fat_per_100g": 10,
+   "fiber_per_100g": 3,
+   "aliases": [
+    "stuffed paratha",
+    "paratha aloo"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Chole Bhature",
+   "category": "grain",
+   "default_serving_unit": "plate",
+   "default_grams": 250,
+   "calories_per_100g": 280,
+   "protein_per_100g": 7,
+   "carbs_per_100g": 33,
+   "fat_per_100g": 13,
+   "fiber_per_100g": 4,
+   "aliases": [
+    "bhature",
+    "bhatura"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Pav Bhaji",
+   "category": "grain",
+   "default_serving_unit": "plate",
+   "default_grams": 250,
+   "calories_per_100g": 190,
+   "protein_per_100g": 4.5,
+   "carbs_per_100g": 26,
+   "fat_per_100g": 8,
+   "fiber_per_100g": 3,
+   "aliases": [
+    "bhaji pav"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Veg Fried Rice",
+   "category": "grain",
+   "default_serving_unit": "plate",
+   "default_grams": 200,
+   "calories_per_100g": 165,
+   "protein_per_100g": 3.5,
+   "carbs_per_100g": 26,
+   "fat_per_100g": 5.5,
+   "fiber_per_100g": 1.2,
+   "aliases": [
+    "fried rice"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Veg Chowmein",
+   "category": "grain",
+   "default_serving_unit": "plate",
+   "default_grams": 200,
+   "calories_per_100g": 160,
+   "protein_per_100g": 4,
+   "carbs_per_100g": 24,
+   "fat_per_100g": 5.5,
+   "fiber_per_100g": 1.5,
+   "aliases": [
+    "chowmein",
+    "hakka noodles",
+    "noodles"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Pasta (Red Sauce)",
+   "category": "grain",
+   "default_serving_unit": "plate",
+   "default_grams": 200,
+   "calories_per_100g": 150,
+   "protein_per_100g": 4.5,
+   "carbs_per_100g": 25,
+   "fat_per_100g": 3.5,
+   "fiber_per_100g": 1.8,
+   "aliases": [
+    "pasta",
+    "white sauce pasta"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Curd Rice",
+   "category": "grain",
+   "default_serving_unit": "katori",
+   "default_grams": 180,
+   "calories_per_100g": 120,
+   "protein_per_100g": 3,
+   "carbs_per_100g": 20,
+   "fat_per_100g": 3,
+   "fiber_per_100g": 0.4,
+   "aliases": [
+    "dahi chawal"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Lemon Rice",
+   "category": "grain",
+   "default_serving_unit": "katori",
+   "default_grams": 180,
+   "calories_per_100g": 165,
+   "protein_per_100g": 3,
+   "carbs_per_100g": 28,
+   "fat_per_100g": 4.5,
+   "fiber_per_100g": 0.8,
+   "aliases": [
+    "chitranna"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Uttapam",
+   "category": "grain",
+   "default_serving_unit": "piece",
+   "default_grams": 100,
+   "calories_per_100g": 160,
+   "protein_per_100g": 4,
+   "carbs_per_100g": 26,
+   "fat_per_100g": 4,
+   "fiber_per_100g": 1.2,
+   "aliases": [
+    "uthappam"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Medu Vada",
+   "category": "snack",
+   "default_serving_unit": "piece",
+   "default_grams": 40,
+   "calories_per_100g": 290,
+   "protein_per_100g": 9,
+   "carbs_per_100g": 30,
+   "fat_per_100g": 15,
+   "fiber_per_100g": 3,
+   "aliases": [
+    "vada",
+    "vadai"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Samosa",
+   "category": "snack",
+   "default_serving_unit": "piece",
+   "default_grams": 60,
+   "calories_per_100g": 310,
+   "protein_per_100g": 5,
+   "carbs_per_100g": 32,
+   "fat_per_100g": 18,
+   "fiber_per_100g": 2.5,
+   "aliases": [
+    "aloo samosa"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Pakora",
+   "category": "snack",
+   "default_serving_unit": "piece",
+   "default_grams": 20,
+   "calories_per_100g": 300,
+   "protein_per_100g": 7,
+   "carbs_per_100g": 28,
+   "fat_per_100g": 18,
+   "fiber_per_100g": 3,
+   "aliases": [
+    "pakoda",
+    "bhajiya",
+    "onion pakora"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Bread Pakora",
+   "category": "snack",
+   "default_serving_unit": "piece",
+   "default_grams": 70,
+   "calories_per_100g": 280,
+   "protein_per_100g": 6.5,
+   "carbs_per_100g": 30,
+   "fat_per_100g": 15,
+   "fiber_per_100g": 1.8,
+   "aliases": [],
+   "source": "custom"
+  },
+  {
+   "name": "Veg Manchurian",
+   "category": "vegetable",
+   "default_serving_unit": "katori",
+   "default_grams": 120,
+   "calories_per_100g": 170,
+   "protein_per_100g": 4,
+   "carbs_per_100g": 16,
+   "fat_per_100g": 10,
+   "fiber_per_100g": 2,
+   "aliases": [
+    "manchurian",
+    "gobi manchurian"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Sprouts Salad",
+   "category": "vegetable",
+   "default_serving_unit": "katori",
+   "default_grams": 100,
+   "calories_per_100g": 90,
+   "protein_per_100g": 7,
+   "carbs_per_100g": 14,
+   "fat_per_100g": 0.8,
+   "fiber_per_100g": 4,
+   "aliases": [
+    "moong sprouts",
+    "sprouts",
+    "ankurit moong"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Cornflakes with Milk",
+   "category": "grain",
+   "default_serving_unit": "katori",
+   "default_grams": 200,
+   "calories_per_100g": 95,
+   "protein_per_100g": 3.5,
+   "carbs_per_100g": 16,
+   "fat_per_100g": 2,
+   "fiber_per_100g": 0.5,
+   "aliases": [
+    "cornflakes",
+    "cereal"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Bread Butter",
+   "category": "grain",
+   "default_serving_unit": "slice",
+   "default_grams": 35,
+   "calories_per_100g": 330,
+   "protein_per_100g": 7,
+   "carbs_per_100g": 43,
+   "fat_per_100g": 14,
+   "fiber_per_100g": 2.2,
+   "aliases": [
+    "butter toast",
+    "toast"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Bread Jam",
+   "category": "grain",
+   "default_serving_unit": "slice",
+   "default_grams": 40,
+   "calories_per_100g": 280,
+   "protein_per_100g": 6,
+   "carbs_per_100g": 58,
+   "fat_per_100g": 3,
+   "fiber_per_100g": 2,
+   "aliases": [
+    "jam toast",
+    "bread with jam"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Custard",
+   "category": "sweet",
+   "default_serving_unit": "katori",
+   "default_grams": 120,
+   "calories_per_100g": 120,
+   "protein_per_100g": 3.5,
+   "carbs_per_100g": 19,
+   "fat_per_100g": 3.5,
+   "fiber_per_100g": 0,
+   "aliases": [
+    "fruit custard"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Ice Cream",
+   "category": "sweet",
+   "default_serving_unit": "scoop",
+   "default_grams": 60,
+   "calories_per_100g": 210,
+   "protein_per_100g": 3.5,
+   "carbs_per_100g": 24,
+   "fat_per_100g": 11,
+   "fiber_per_100g": 0.5,
+   "aliases": [
+    "icecream",
+    "kulfi"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Rasgulla",
+   "category": "sweet",
+   "default_serving_unit": "piece",
+   "default_grams": 50,
+   "calories_per_100g": 186,
+   "protein_per_100g": 4,
+   "carbs_per_100g": 40,
+   "fat_per_100g": 1.5,
+   "fiber_per_100g": 0,
+   "aliases": [
+    "rasagola"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Besan Ladoo",
+   "category": "sweet",
+   "default_serving_unit": "piece",
+   "default_grams": 40,
+   "calories_per_100g": 480,
+   "protein_per_100g": 9,
+   "carbs_per_100g": 52,
+   "fat_per_100g": 26,
+   "fiber_per_100g": 3,
+   "aliases": [
+    "ladoo",
+    "laddu"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Apple",
+   "category": "fruit",
+   "default_serving_unit": "piece",
+   "default_grams": 150,
+   "calories_per_100g": 52,
+   "protein_per_100g": 0.3,
+   "carbs_per_100g": 14,
+   "fat_per_100g": 0.2,
+   "fiber_per_100g": 2.4,
+   "aliases": [],
+   "source": "custom"
+  },
+  {
+   "name": "Lassi (Sweet)",
+   "category": "dairy",
+   "default_serving_unit": "glass",
+   "default_grams": 250,
+   "calories_per_100g": 90,
+   "protein_per_100g": 3,
+   "carbs_per_100g": 14,
+   "fat_per_100g": 2.5,
+   "fiber_per_100g": 0,
+   "aliases": [
+    "lassi",
+    "sweet lassi"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Paneer (Plain)",
+   "category": "dairy",
+   "default_serving_unit": "katori",
+   "default_grams": 100,
+   "calories_per_100g": 265,
+   "protein_per_100g": 18,
+   "carbs_per_100g": 1.2,
+   "fat_per_100g": 21,
+   "fiber_per_100g": 0,
+   "aliases": [
+    "cottage cheese"
+   ],
+   "source": "custom"
+  },
+  {
+   "name": "Green Chutney",
+   "category": "condiment",
+   "default_serving_unit": "tablespoon",
+   "default_grams": 15,
+   "calories_per_100g": 40,
+   "protein_per_100g": 1.5,
+   "carbs_per_100g": 6,
+   "fat_per_100g": 1,
+   "fiber_per_100g": 2,
+   "aliases": [
+    "chutney",
+    "mint chutney",
+    "pudina chutney"
+   ],
+   "source": "custom"
+  }
+ ]
+}
