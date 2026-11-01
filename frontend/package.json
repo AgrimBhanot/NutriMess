@@ -7,7 +7,7 @@
     "build": "next build && node scripts/prepare-standalone.mjs",
     "start": "next start",
     "lint": "eslint",
-    "type-check": "tsc --noEmit",
+    "type-check": "next typegen && tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
