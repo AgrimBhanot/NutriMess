@@ -4,6 +4,7 @@ export const BUCKETS = {
   menuImages: "menu-images",
   complaints: "complaints",
   plateImages: "plate-images",
+  chatImages: "chat-images",
 } as const;
 
 export const MAX_IMAGE_MB = 5;
@@ -65,7 +66,10 @@ export function publicImageUrl(
 /** Signed URLs for private buckets; missing/forbidden paths are skipped. */
 export async function signedImageUrls(
   supabase: SupabaseClient,
-  bucket: typeof BUCKETS.complaints | typeof BUCKETS.plateImages,
+  bucket:
+    | typeof BUCKETS.complaints
+    | typeof BUCKETS.plateImages
+    | typeof BUCKETS.chatImages,
   paths: string[],
   expiresIn = 60 * 60
 ): Promise<Record<string, string>> {
