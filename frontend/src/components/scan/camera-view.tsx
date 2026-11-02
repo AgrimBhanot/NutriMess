@@ -1,8 +1,20 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import { Camera, ImageUp, PenLine } from "lucide-react";
 import { useCamera } from "@/lib/hooks/use-camera";
+
+// QR-scanner, WhatsApp, Instagram etc. open links in webviews that usually
+// can't grant camera access to websites
+const IN_APP_BROWSER = /FBAN|FBAV|Instagram|WhatsApp|Line\/|; wv\)|Snapchat|GSA\//i;
+
+function useInAppBrowser(): boolean {
+  return useSyncExternalStore(
+    () => () => {},
+    () => IN_APP_BROWSER.test(navigator.userAgent),
+    () => false
+  );
+}
 
 interface CameraViewProps {
   onCapture: (file: File) => void;
@@ -26,6 +38,7 @@ export function CameraView({ onCapture, onManual }: CameraViewProps) {
   }
 
   const cameraBlocked = status === "denied" || status === "unavailable";
+  const inAppBrowser = useInAppBrowser();
 
   return (
     <div className="space-y-4">
@@ -65,18 +78,41 @@ export function CameraView({ onCapture, onManual }: CameraViewProps) {
           </p>
         )}
         {cameraBlocked && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-6 text-center">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
             <Camera className="h-8 w-8 stroke-[1.5px] text-white/60" />
             <p className="text-sm font-medium text-white">
-              {status === "denied"
-                ? "Camera access is blocked"
-                : "Camera not available"}
+              {inAppBrowser
+                ? "This in-app browser can't use the camera"
+                : status === "denied"
+                  ? "Camera access is blocked"
+                  : "Live camera not available"}
             </p>
-            <p className="text-xs text-white/60">
-              {status === "denied"
-                ? "Allow camera access in your browser settings, or upload a photo instead."
-                : "Upload a photo of your plate instead."}
+            <p className="text-xs text-white/70">
+              {inAppBrowser
+                ? "Open this page in Chrome or Safari for the live camera, or take a photo below."
+                : status === "denied"
+                  ? "Tap the lock icon next to the address bar, then Permissions → Camera → Allow, and try again. Or take a photo below."
+                  : "Take a photo with your camera app instead."}
             </p>
+            <div className="mt-1 flex flex-wrap justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="flex h-10 items-center gap-2 rounded-xl bg-white px-4 text-sm font-medium text-[#244E3D]"
+              >
+                <Camera className="h-4 w-4 stroke-[1.5px]" />
+                Take photo
+              </button>
+              {status === "denied" && !inAppBrowser && (
+                <button
+                  type="button"
+                  onClick={() => start()}
+                  className="h-10 rounded-xl border border-white/40 px-4 text-sm font-medium text-white"
+                >
+                  Try again
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>

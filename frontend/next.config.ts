@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        // Plate scanning needs the camera; allow it for this origin only
+        source: "/:path*",
+        headers: [{ key: "Permissions-Policy", value: "camera=(self)" }],
+      },
+      {
         // Service worker must never be cached, or users get stuck on old code
         source: "/sw.js",
         headers: [

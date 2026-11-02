@@ -43,7 +43,7 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://zvepctjxrvdtoyatpzqh.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          NEXT_PUBLIC_API_URL: https://nutrimess-backend-fbb3fwemg4evckah.eastasia-01.azurewebsites.net
+          NEXT_PUBLIC_API_URL: ${{ vars.BACKEND_URL || 'https://nutrimess-backend-fbb3fwemg4evckah.eastasia-01.azurewebsites.net' }}
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_KIND_COAST_021723100 }}
           action: "upload"

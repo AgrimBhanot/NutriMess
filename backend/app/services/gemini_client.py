@@ -51,6 +51,14 @@ async def _generate(
                 logger.warning("Gemini %s, retrying in %ss", exc.code, delay)
                 await asyncio.sleep(delay)
                 continue
+            if "location is not supported" in (exc.message or "").lower():
+                # Gemini's free API is geo-restricted (e.g. not Hong Kong /
+                # Azure East Asia); the server must run in a supported region
+                logger.error("Gemini rejected this server's region: %s", exc.message)
+                raise GeminiRequestError(
+                    "The AI service isn't available from this server's region. "
+                    "Host the backend in a supported region (e.g. Azure Central India)."
+                ) from exc
             raise GeminiRequestError(f"Gemini request failed: {exc.message}") from exc
     raise GeminiRequestError("Gemini request failed after retries")
 

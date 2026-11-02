@@ -108,6 +108,28 @@ its secret in **Client Secret (for OAuth)**. `invalid_client` in the auth
 logs means the secret doesn't match that client ID; add a new secret in
 Google (it's shown only once) and re-paste.
 
+## Backend region (Gemini availability)
+
+Google's Gemini API is geo-restricted and is **not available from Azure East
+Asia (Hong Kong)**; calls fail with "User location is not supported". Host
+the backend in a supported region, e.g. **Central India** (closest to
+Roorkee) or **Southeast Asia** (Singapore).
+
+Moving the App Service:
+
+1. Portal → Create **Web App**: Linux, Python 3.12, region **Central India**,
+   same resource group. Apply the settings from
+   [Backend App Service](#backend-app-service-portal--nutrimess-backend)
+   (startup command, env vars, health check, SCM basic auth).
+2. Download its publish profile → update the `AZURE_BACKEND_PUBLISH_PROFILE` secret.
+3. GitHub → Settings → Secrets and variables → Actions → **Variables**:
+   `BACKEND_APP_NAME` = the new app's name, `BACKEND_URL` = its `https://…` URL
+   (both workflows read these; no code change).
+4. Static Web App → Environment variables: update `NEXT_PUBLIC_API_URL`.
+5. Actions → run **Deploy backend**, then **Deploy frontend** (the API URL
+   is compiled into the frontend at build time).
+6. Delete the old East Asia app once the new one is healthy.
+
 ## QR codes
 
 `qr/` targets the Azure URL. If the app moves (e.g. a custom domain):
@@ -140,4 +162,7 @@ python scripts/generate_qr.py --url https://your-domain
 | "Could not reach the NutriMess server" | Backend down: App Service → Log stream; check startup command and app settings |
 | Browser console CORS error | `CORS_ORIGINS` on the backend doesn't include the exact frontend origin |
 | AI features return 503 | `GEMINI_API_KEY` missing in App Service settings |
+| "AI service isn't available from this server's region" | Backend region not supported by Gemini; see [Backend region](#backend-region-gemini-availability) |
+| Google sign-in lands on an unreachable host like `d38c74da8e20` | Fixed: `/auth/callback` uses relative redirects (the SWA backend sees an internal host) |
+| Phone says the site can't use the camera | Opened in an in-app browser (QR scanner, WhatsApp) or permission denied; open in Chrome/Safari, or use "Take photo" |
 | Backend deploy 401 | Publish profile reset or SCM basic auth disabled; update the secret |

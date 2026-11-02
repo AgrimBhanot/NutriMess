@@ -242,3 +242,29 @@ def test_sliding_window_limiter_blocks_then_recovers(monkeypatch) -> None:
 
     clock[0] += 61
     limiter.check("u1")  # window has passed
+
+
+# ---------- Gemini errors ----------
+
+def test_region_block_gives_actionable_error(monkeypatch) -> None:
+    import asyncio
+
+    from google.genai import errors, types
+
+    from app.services import gemini_client
+
+    class FakeModels:
+        async def generate_content(self, **kwargs):
+            raise errors.ClientError(
+                400,
+                {"error": {"code": 400, "message": "User location is not supported for the API use.",
+                           "status": "FAILED_PRECONDITION"}},
+            )
+
+    class FakeClient:
+        class aio:
+            models = FakeModels()
+
+    monkeypatch.setattr(gemini_client, "get_client", lambda: FakeClient())
+    with pytest.raises(gemini_client.GeminiRequestError, match="region"):
+        asyncio.run(gemini_client._generate([], types.GenerateContentConfig(), max_attempts=1))

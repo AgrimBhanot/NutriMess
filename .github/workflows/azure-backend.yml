@@ -12,6 +12,12 @@ concurrency:
   group: deploy-backend
   cancel-in-progress: false
 
+# Set repository variables BACKEND_APP_NAME / BACKEND_URL (Settings → Secrets
+# and variables → Actions → Variables) to point at a different App Service.
+env:
+  BACKEND_APP_NAME: ${{ vars.BACKEND_APP_NAME || 'NutriMess-backend' }}
+  BACKEND_URL: ${{ vars.BACKEND_URL || 'https://nutrimess-backend-fbb3fwemg4evckah.eastasia-01.azurewebsites.net' }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -33,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: https://nutrimess-backend-fbb3fwemg4evckah.eastasia-01.azurewebsites.net/api/health
+      url: ${{ env.BACKEND_URL }}/api/health
     steps:
       - uses: actions/checkout@v4
 
@@ -48,13 +54,13 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: NutriMess-backend
+          app-name: ${{ env.BACKEND_APP_NAME }}
           publish-profile: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE }}
           package: dist
 
       - name: Health check
         run: |
-          url="https://nutrimess-backend-fbb3fwemg4evckah.eastasia-01.azurewebsites.net/api/health"
+          url="$BACKEND_URL/api/health"
           for i in $(seq 1 20); do
             if curl -fsS --max-time 30 "$url"; then echo; echo "Backend healthy"; exit 0; fi
             echo "Waiting for backend to start ($i/20)..."; sleep 15
