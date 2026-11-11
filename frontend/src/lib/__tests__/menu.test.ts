@@ -33,5 +33,6 @@ describe("API URL", async () => {
     expect(normalizeApiUrl(" https://api.example.com/ ")).toBe("https://api.example.com");
     expect(normalizeApiUrl("http://localhost:8000")).toBe("http://localhost:8000");
     expect(normalizeApiUrl(undefined)).toBe("http://localhost:8000");
+    expect(normalizeApiUrl(' "api.example.com/"\n')).toBe("https://api.example.com");
   });
 });

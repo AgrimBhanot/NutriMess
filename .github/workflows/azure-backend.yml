@@ -60,9 +60,13 @@ jobs:
 
       - name: Health check
         run: |
-          base="${BACKEND_URL%/}"
+          # Tolerate a BACKEND_URL variable pasted with spaces, newlines,
+          # quotes, a trailing slash or no scheme
+          base=$(printf '%s' "$BACKEND_URL" | tr -d "[:space:]\"'")
+          base="${base%/}"
           case "$base" in http://*|https://*) ;; *) base="https://$base" ;; esac
           url="$base/api/health"
+          echo "Checking $url"
           for i in $(seq 1 20); do
             if curl -fsS --max-time 30 "$url"; then echo; echo "Backend healthy"; exit 0; fi
             echo "Waiting for backend to start ($i/20)..."; sleep 15

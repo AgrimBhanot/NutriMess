@@ -87,12 +87,13 @@ export const GOALS = [
 // ============================================
 
 /**
- * Backend base URL. Tolerates a value saved without a scheme or with a
- * trailing slash: "host.azurewebsites.net" would otherwise be treated as a
+ * Backend base URL. Tolerates a value saved without a scheme, with a
+ * trailing slash, or with pasted whitespace/quotes: "host.azurewebsites.net" would otherwise be treated as a
  * relative path and every API call would hit the frontend itself.
  */
 export function normalizeApiUrl(raw: string | undefined): string {
-  const value = (raw ?? "").trim().replace(/\/+$/, "");
+  // Drop whitespace/newlines and quotes picked up when pasting the value
+  const value = (raw ?? "").replace(/["'\s]/g, "").replace(/\/+$/, "");
   if (!value) return "http://localhost:8000";
   return /^https?:\/\//i.test(value) ? value : `https://${value}`;
 }
