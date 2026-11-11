@@ -86,8 +86,18 @@ export const GOALS = [
 // API
 // ============================================
 
-export const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+/**
+ * Backend base URL. Tolerates a value saved without a scheme or with a
+ * trailing slash: "host.azurewebsites.net" would otherwise be treated as a
+ * relative path and every API call would hit the frontend itself.
+ */
+export function normalizeApiUrl(raw: string | undefined): string {
+  const value = (raw ?? "").trim().replace(/\/+$/, "");
+  if (!value) return "http://localhost:8000";
+  return /^https?:\/\//i.test(value) ? value : `https://${value}`;
+}
+
+export const API_URL = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
 
 // ============================================
 // Complaints

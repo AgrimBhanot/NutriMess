@@ -22,3 +22,16 @@ describe("menu grid", () => {
     ]);
   });
 });
+
+describe("API URL", async () => {
+  const { normalizeApiUrl } = await import("@/lib/constants");
+
+  it("adds https:// when the scheme is missing and strips trailing slashes", () => {
+    expect(normalizeApiUrl("nutrimess-api.malaysiawest-01.azurewebsites.net")).toBe(
+      "https://nutrimess-api.malaysiawest-01.azurewebsites.net"
+    );
+    expect(normalizeApiUrl(" https://api.example.com/ ")).toBe("https://api.example.com");
+    expect(normalizeApiUrl("http://localhost:8000")).toBe("http://localhost:8000");
+    expect(normalizeApiUrl(undefined)).toBe("http://localhost:8000");
+  });
+});

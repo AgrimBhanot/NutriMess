@@ -16,6 +16,25 @@ export class ApiError extends Error {
   }
 }
 
+/** Human-readable message for a failed response. FastAPI sends
+ *  {detail: string} or, for validation errors, {detail: [{msg}]}; gateways
+ *  may send HTML. statusText is empty over HTTP/2, so never rely on it. */
+async function errorMessage(res: Response): Promise<string> {
+  const body = (await res.json().catch(() => null)) as { detail?: unknown } | null;
+  const detail = body?.detail;
+  if (typeof detail === "string" && detail) return detail;
+  if (Array.isArray(detail) && typeof detail[0]?.msg === "string") {
+    return `Invalid request: ${detail[0].msg}`;
+  }
+  if (res.status === 404 || res.status === 405) {
+    return "The NutriMess server address looks wrong (check NEXT_PUBLIC_API_URL)";
+  }
+  if (res.status >= 500) {
+    return `The NutriMess server had a problem (${res.status}). Please try again`;
+  }
+  return `Request failed (${res.status})`;
+}
+
 async function request<T>(
   path: string,
   accessToken: string | null,
@@ -37,12 +56,7 @@ async function request<T>(
   }
 
   if (!res.ok) {
-    const body = (await res.json().catch(() => null)) as {
-      detail?: unknown;
-    } | null;
-    const detail =
-      typeof body?.detail === "string" ? body.detail : res.statusText;
-    throw new ApiError(detail, res.status);
+    throw new ApiError(await errorMessage(res), res.status);
   }
   return (await res.json()) as T;
 }

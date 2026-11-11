@@ -123,7 +123,7 @@ Moving the App Service:
    (startup command, env vars, health check, SCM basic auth).
 2. Download its publish profile → update the `AZURE_BACKEND_PUBLISH_PROFILE` secret.
 3. GitHub → Settings → Secrets and variables → Actions → **Variables**:
-   `BACKEND_APP_NAME` = the new app's name, `BACKEND_URL` = its `https://…` URL
+   `BACKEND_APP_NAME` = the new app's name, `BACKEND_URL` = its full URL **including `https://`**, no trailing `/`
    (both workflows read these; no code change).
 4. Static Web App → Environment variables: update `NEXT_PUBLIC_API_URL`.
 5. Actions → run **Deploy backend**, then **Deploy frontend** (the API URL
