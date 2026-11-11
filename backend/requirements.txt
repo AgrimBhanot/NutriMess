@@ -5,7 +5,8 @@ gunicorn>=23.0.0
 pydantic>=2.0.0
 pydantic-settings>=2.0.0
 python-dotenv>=1.0.0
-google-genai>=1.0.0
+# 3.x changed defaults (API v1); stay on the tested major
+google-genai>=2.30,<3
 httpx>=0.27.0
 python-multipart>=0.0.9
 # zoneinfo data for Asia/Kolkata on slim images

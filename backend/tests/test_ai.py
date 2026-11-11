@@ -268,3 +268,19 @@ def test_region_block_gives_actionable_error(monkeypatch) -> None:
     monkeypatch.setattr(gemini_client, "get_client", lambda: FakeClient())
     with pytest.raises(gemini_client.GeminiRequestError, match="region"):
         asyncio.run(gemini_client._generate([], types.GenerateContentConfig(), max_attempts=1))
+
+
+def test_gemini_client_uses_v1beta(monkeypatch) -> None:
+    """JSON mode (response_schema) is rejected on API v1."""
+    from app.config import get_settings
+    from app.services import gemini_client
+
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    get_settings.cache_clear()
+    gemini_client.get_client.cache_clear()
+    try:
+        client = gemini_client.get_client()
+        assert client._api_client._http_options.api_version == "v1beta"
+    finally:
+        get_settings.cache_clear()
+        gemini_client.get_client.cache_clear()

@@ -29,7 +29,12 @@ def get_client() -> genai.Client:
     settings = get_settings()
     if not settings.gemini_api_key:
         raise GeminiNotConfiguredError("GEMINI_API_KEY is not set")
-    return genai.Client(api_key=settings.gemini_api_key)
+    # Structured JSON output (response_schema) is only enabled on v1beta;
+    # google-genai 3.x defaults to v1, so pin the API version explicitly.
+    return genai.Client(
+        api_key=settings.gemini_api_key,
+        http_options=types.HttpOptions(api_version="v1beta"),
+    )
 
 
 async def _generate(
